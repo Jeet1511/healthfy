@@ -3,7 +3,8 @@ export default function ProfilePage() {
     <div className="grid gap-4 lg:grid-cols-5">
       <section className="panel-shell lg:col-span-3">
         <div className="mb-4 rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">
-          ✅ Profile active · Emergency readiness status: Safe
+          <span className="status-dot status-dot-safe" />
+          💓 Profile active · Emergency readiness status: Safe / Monitoring
         </div>
 
         <h3 className="text-xl font-semibold text-slate-100">Profile</h3>

@@ -96,19 +96,20 @@ export function GlobalTopNav() {
           <button
             type="button"
             onClick={() => setOpen((value) => !value)}
-            className="profile-trigger"
+            className="profile-trigger relative"
           >
             <span className="avatar-circle">JS</span>
+            <span className="status-dot status-dot-safe absolute right-[-2px] top-[-2px]" aria-hidden />
             <span className="hidden text-left sm:block">
               <span className="block text-xs text-slate-300">{sessionLabel}</span>
-              <span className="block text-[11px] text-emerald-300">Active · Safe</span>
+              <span className="block text-[11px] text-emerald-300">💓 Active · Safe</span>
             </span>
           </button>
 
           {open ? (
             <div className="profile-menu">
               <p className="text-sm font-semibold text-slate-100">{sessionLabel}</p>
-              <p className="text-xs text-emerald-300">Status: Active / Safe</p>
+              <p className="text-xs text-emerald-300">Status: 💓 Active / Safe</p>
 
               <div className="mt-3 space-y-1 border-t border-white/10 pt-2">
                 <Link href="/platform/profile" className="profile-menu-item" onClick={() => setOpen(false)}>
@@ -128,6 +129,9 @@ export function GlobalTopNav() {
             </div>
           ) : null}
         </div>
+      </div>
+      <div className="heartbeat-strip" aria-hidden>
+        <div className="ecg-line" />
       </div>
     </header>
   );

@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030712;
-  --foreground: #dbe5f1;
+  --background: #0b1f3a;
+  --foreground: #ecf6ff;
+  --medical-red: #ff4d4d;
+  --medical-green: #3ddc97;
+  --medical-cyan: #8de6ff;
+  --medical-teal: #14b8a6;
+  --medical-warm: #fde9d9;
 }
 
 @theme inline {
@@ -16,36 +21,41 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  letter-spacing: 0.01em;
 }
 
 .bg-command {
+  background-color: #0b1f3a;
   background-image:
-    radial-gradient(circle at 12% -10%, rgba(59, 130, 246, 0.16), transparent 36%),
-    radial-gradient(circle at 88% 112%, rgba(100, 116, 139, 0.2), transparent 35%),
-    linear-gradient(130deg, #030712, #0b1220 45%, #111827);
+    radial-gradient(circle at 8% -16%, rgba(141, 230, 255, 0.22), transparent 38%),
+    radial-gradient(circle at 92% 116%, rgba(61, 220, 151, 0.16), transparent 34%),
+    radial-gradient(circle at 75% 22%, rgba(255, 77, 77, 0.07), transparent 30%),
+    linear-gradient(145deg, #0b1f3a 0%, #0e2a4a 45%, #0b3b57 70%, #0f5064 100%);
+  animation: breathingBg 14s ease-in-out infinite;
 }
 
 .top-nav {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 60;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(2, 6, 23, 0.45);
-  backdrop-filter: blur(9px);
+  border-bottom: 1px solid rgba(141, 230, 255, 0.2);
+  background: linear-gradient(135deg, rgba(11, 31, 58, 0.7), rgba(14, 42, 74, 0.64));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 26px rgba(9, 29, 56, 0.35);
   transition: all 0.35s ease;
 }
 
 .top-nav-scrolled {
-  background: rgba(2, 6, 23, 0.72);
-  border-bottom-color: rgba(148, 163, 184, 0.24);
+  background: linear-gradient(135deg, rgba(11, 31, 58, 0.84), rgba(11, 59, 87, 0.72));
+  border-bottom-color: rgba(141, 230, 255, 0.28);
 }
 
 .logo-dot {
   width: 0.62rem;
   height: 0.62rem;
   border-radius: 9999px;
-  background: linear-gradient(140deg, #22d3ee, #60a5fa);
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.5);
+  background: linear-gradient(140deg, var(--medical-cyan), #36c4f6);
+  box-shadow: 0 0 16px rgba(141, 230, 255, 0.5);
 }
 
 .top-link {
@@ -66,10 +76,10 @@ body {
 }
 
 .top-link-active {
-  border-color: rgba(56, 189, 248, 0.42);
+  border-color: rgba(141, 230, 255, 0.45);
   color: #e2e8f0;
-  background: rgba(30, 58, 138, 0.25);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.18);
+  background: rgba(31, 91, 118, 0.38);
+  box-shadow: 0 0 18px rgba(141, 230, 255, 0.22);
 }
 
 .profile-trigger {
@@ -84,7 +94,7 @@ body {
 }
 
 .profile-trigger:hover {
-  border-color: rgba(56, 189, 248, 0.45);
+  border-color: rgba(141, 230, 255, 0.45);
 }
 
 .avatar-circle {
@@ -96,7 +106,7 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   color: #e0f2fe;
-  background: linear-gradient(140deg, rgba(14, 116, 144, 0.92), rgba(30, 64, 175, 0.9));
+  background: linear-gradient(140deg, rgba(22, 108, 134, 0.95), rgba(21, 102, 139, 0.9));
 }
 
 .profile-menu {
@@ -106,7 +116,7 @@ body {
   width: 210px;
   border: 1px solid rgba(148, 163, 184, 0.26);
   border-radius: 0.85rem;
-  background: rgba(2, 6, 23, 0.95);
+  background: rgba(11, 31, 58, 0.95);
   box-shadow: 0 12px 36px rgba(2, 6, 23, 0.5);
   padding: 0.65rem;
 }
@@ -127,14 +137,16 @@ body {
 .status-shell,
 .panel-shell,
 .modal-shell {
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.76),
-    rgba(15, 23, 42, 0.42)
+    rgba(248, 252, 255, 0.12),
+    rgba(18, 46, 80, 0.46)
   );
   backdrop-filter: blur(16px);
-  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.46);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 36px rgba(7, 24, 48, 0.34);
 }
 
 .status-shell,
@@ -179,7 +191,7 @@ body {
 
 .primary-btn {
   border-radius: 0.7rem;
-  background: linear-gradient(130deg, rgba(14, 116, 144, 0.95), rgba(37, 99, 235, 0.82));
+  background: linear-gradient(130deg, rgba(20, 184, 166, 0.9), rgba(56, 189, 248, 0.82));
   color: #f8fafc;
   font-size: 0.82rem;
   font-weight: 600;
@@ -189,7 +201,7 @@ body {
 }
 
 .primary-btn:hover {
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
+  box-shadow: 0 0 20px rgba(141, 230, 255, 0.32);
 }
 
 .quick-pill,
@@ -279,7 +291,7 @@ body {
   width: 170px;
   height: 170px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 72%);
+  background: radial-gradient(circle, rgba(141, 230, 255, 0.2), transparent 72%);
   pointer-events: none;
 }
 
@@ -292,20 +304,20 @@ body {
   width: 5rem;
   height: 2px;
   margin-bottom: 0.75rem;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.8), rgba(56, 189, 248, 0.06));
+  background: linear-gradient(90deg, rgba(141, 230, 255, 0.85), rgba(141, 230, 255, 0.06));
 }
 
 .floating-light {
   position: absolute;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.28), rgba(56, 189, 248, 0));
+  background: radial-gradient(circle, rgba(141, 230, 255, 0.26), rgba(141, 230, 255, 0));
   filter: blur(22px);
   pointer-events: none;
   animation: floatGlow 9s ease-in-out infinite;
 }
 
 .floating-light-alt {
-  background: radial-gradient(circle, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0));
+  background: radial-gradient(circle, rgba(61, 220, 151, 0.2), rgba(61, 220, 151, 0));
   animation-delay: 1.6s;
 }
 
@@ -334,9 +346,9 @@ body {
 }
 
 .urgency-critical {
-  background: rgba(185, 28, 28, 0.24);
+  background: rgba(255, 77, 77, 0.25);
   color: #fecaca;
-  border-color: rgba(248, 113, 113, 0.5);
+  border-color: rgba(255, 126, 126, 0.55);
 }
 
 .urgency-moderate {
@@ -346,9 +358,9 @@ body {
 }
 
 .urgency-safe {
-  background: rgba(22, 101, 52, 0.2);
+  background: rgba(61, 220, 151, 0.18);
   color: #bbf7d0;
-  border-color: rgba(74, 222, 128, 0.45);
+  border-color: rgba(61, 220, 151, 0.45);
 }
 
 .action-btn {
@@ -364,24 +376,137 @@ body {
 }
 
 .action-btn:hover {
-  border-color: rgba(56, 189, 248, 0.42);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.15);
+  border-color: rgba(141, 230, 255, 0.45);
+  box-shadow: 0 0 18px rgba(141, 230, 255, 0.18);
 }
 
 .crisis-btn {
   border-radius: 0.85rem;
-  border: 1px solid rgba(248, 113, 113, 0.45);
-  background: linear-gradient(140deg, rgba(127, 29, 29, 0.95), rgba(153, 27, 27, 0.75));
+  border: 1px solid rgba(255, 126, 126, 0.58);
+  background: linear-gradient(140deg, rgba(255, 77, 77, 0.95), rgba(189, 43, 43, 0.84));
   color: #fee2e2;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   padding: 0.72rem;
   transition: all 0.35s ease;
+  animation: emergencyPulse 2.2s ease-in-out infinite;
 }
 
 .crisis-btn:hover {
-  box-shadow: 0 0 20px rgba(248, 113, 113, 0.22);
+  box-shadow: 0 0 24px rgba(255, 77, 77, 0.34);
+}
+
+.heartbeat-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0.85;
+}
+
+.ecg-line {
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 9%,
+    rgba(141, 230, 255, 0.65) 10%,
+    transparent 11%,
+    transparent 19%,
+    rgba(141, 230, 255, 0.65) 20%,
+    transparent 21%,
+    transparent 33%,
+    rgba(255, 77, 77, 0.6) 34%,
+    transparent 35%,
+    transparent 100%
+  );
+  animation: ecgMove 4.8s linear infinite;
+}
+
+.hero-ecg {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  top: 14%;
+  height: 64px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.hero-ecg svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-ecg path {
+  fill: none;
+  stroke: rgba(141, 230, 255, 0.9);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: ecgTrace 6s linear infinite;
+}
+
+.medical-illustration {
+  position: absolute;
+  right: -26px;
+  top: -30px;
+  width: 210px;
+  height: 210px;
+  border-radius: 42% 58% 40% 60% / 54% 42% 58% 46%;
+  background:
+    radial-gradient(circle at 34% 32%, rgba(141, 230, 255, 0.3), rgba(141, 230, 255, 0)),
+    radial-gradient(circle at 62% 68%, rgba(61, 220, 151, 0.2), rgba(61, 220, 151, 0)),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  filter: blur(0.2px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.blood-flow {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 77, 77, 0.24), rgba(255, 77, 77, 0));
+  filter: blur(20px);
+  pointer-events: none;
+  animation: bloodFlow 8s ease-in-out infinite;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  margin-right: 0.38rem;
+}
+
+.status-dot-active {
+  background: var(--medical-cyan);
+  box-shadow: 0 0 10px rgba(141, 230, 255, 0.6);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-dot-safe {
+  background: var(--medical-green);
+  box-shadow: 0 0 10px rgba(61, 220, 151, 0.6);
+  animation: statusPulse 2.2s ease-in-out infinite;
+}
+
+.status-dot-critical {
+  background: var(--medical-red);
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.62);
+  animation: statusPulse 1.4s ease-in-out infinite;
+}
+
+.warm-caption {
+  color: rgba(253, 233, 217, 0.9);
 }
 
 .modal-backdrop {
@@ -465,5 +590,74 @@ body {
   }
   50% {
     transform: translateY(-12px) scale(1.04);
+  }
+}
+
+@keyframes ecgMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes ecgTrace {
+  0% {
+    stroke-dashoffset: 420;
+  }
+  100% {
+    stroke-dashoffset: -420;
+  }
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.68;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes breathingBg {
+  0%,
+  100% {
+    filter: saturate(1);
+  }
+  50% {
+    filter: saturate(1.06);
+  }
+}
+
+@keyframes bloodFlow {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) translateX(8px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes emergencyPulse {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 0 0 rgba(255, 77, 77, 0);
+  }
+  30% {
+    transform: translateX(-0.4px) scale(1.01);
+  }
+  40% {
+    transform: translateX(0.4px) scale(1.01);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.25);
   }
 }

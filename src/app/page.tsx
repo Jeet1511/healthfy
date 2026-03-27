@@ -46,6 +46,7 @@ export default function LandingPage() {
     <div className="relative min-h-screen overflow-hidden bg-command text-slate-100">
       <div className="floating-light left-[-120px] top-16 h-72 w-72" />
       <div className="floating-light floating-light-alt right-[-140px] top-72 h-80 w-80" />
+      <div className="blood-flow right-16 top-[34rem] h-52 w-52" />
 
       <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
         <motion.section
@@ -54,6 +55,12 @@ export default function LandingPage() {
           transition={{ duration: 0.6 }}
           className="panel-shell relative overflow-hidden"
         >
+          <div className="medical-illustration" aria-hidden />
+          <div className="hero-ecg" aria-hidden>
+            <svg viewBox="0 0 1000 120" preserveAspectRatio="none">
+              <path d="M0 70 L120 70 L160 68 L190 22 L220 98 L260 46 L300 70 L1000 70" />
+            </svg>
+          </div>
           <div className="section-divider" />
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">LifeLine Platform</p>
           <h1 className="mt-2 max-w-3xl text-4xl font-semibold leading-tight md:text-5xl">
@@ -64,8 +71,23 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/auth" className="primary-btn">Get Started</Link>
-            <Link href="/platform" className="quick-pill px-4 py-2 text-sm">Try Live Demo</Link>
+            <Link href="/auth" className="primary-btn">Get Help Now</Link>
+            <Link href="/platform" className="quick-pill px-4 py-2 text-sm">Explore Platform</Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-3">
+            <div className="rounded-xl bg-white/8 p-3">
+              <p className="text-xs text-slate-300">Live System</p>
+              <p className="mt-1 text-sm"><span className="status-dot status-dot-active" />AI triage operational</p>
+            </div>
+            <div className="rounded-xl bg-white/8 p-3">
+              <p className="text-xs text-slate-300">Care Network</p>
+              <p className="mt-1 text-sm"><span className="status-dot status-dot-safe" />500+ hospitals connected</p>
+            </div>
+            <div className="rounded-xl bg-white/8 p-3">
+              <p className="text-xs text-slate-300">Emergency Readiness</p>
+              <p className="mt-1 text-sm warm-caption"><span className="status-dot status-dot-critical" />Real-time response system</p>
+            </div>
           </div>
         </motion.section>
 
@@ -102,6 +124,29 @@ export default function LandingPage() {
               <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Step 3</p>
               <p className="mt-1 text-sm">Connect to nearby resources: hospitals, blood banks, and crisis contacts.</p>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-6 panel-shell relative overflow-hidden">
+          <div className="blood-flow left-[-30px] top-[10px] h-40 w-40" />
+          <div className="section-divider" />
+          <h2 className="text-2xl font-semibold text-slate-100">Trusted Emergency System</h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300">
+            Built to guide people calmly in high-stress moments with verified pathways to care, response teams, and resource intelligence.
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
+              <p className="text-xs text-slate-400">Connected Care</p>
+              <p className="mt-1 text-lg font-semibold text-slate-100">500+ hospitals</p>
+            </article>
+            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
+              <p className="text-xs text-slate-400">Response Engine</p>
+              <p className="mt-1 text-lg font-semibold text-slate-100">Real-time triage</p>
+            </article>
+            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
+              <p className="text-xs text-slate-400">Support Coverage</p>
+              <p className="mt-1 text-lg font-semibold text-slate-100">24×7 emergency flow</p>
+            </article>
           </div>
         </section>
 

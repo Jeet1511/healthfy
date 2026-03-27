@@ -10,9 +10,9 @@ type ActionPanelProps = {
 };
 
 const emergencyContacts = [
-  { label: "Call Ambulance", number: "108", distance: "2.4 km", action: "Call Ambulance" },
-  { label: "Notify Police", number: "100", distance: "3.1 km", action: "Notify Police" },
-  { label: "Fire Brigade", number: "101", distance: "4.7 km", action: "Fire Brigade" },
+  { label: "Call Ambulance", number: "108", distance: "2.4 km", action: "Call Ambulance", dot: "status-dot-critical" },
+  { label: "Notify Police", number: "100", distance: "3.1 km", action: "Notify Police", dot: "status-dot-active" },
+  { label: "Fire Brigade", number: "101", distance: "4.7 km", action: "Fire Brigade", dot: "status-dot-safe" },
 ];
 
 export function ActionPanel({ triage, onAction, onActivateCrisis }: ActionPanelProps) {
@@ -34,7 +34,7 @@ export function ActionPanel({ triage, onAction, onActivateCrisis }: ActionPanelP
           >
             <div>
               <p className="text-sm font-medium text-slate-100">{contact.label}</p>
-              <p className="text-xs text-slate-400">Nearest unit: {contact.distance}</p>
+              <p className="text-xs text-slate-400"><span className={`status-dot ${contact.dot}`} />Nearest unit: {contact.distance}</p>
             </div>
             <p className="text-sm font-semibold text-slate-200">{contact.number}</p>
           </motion.button>
