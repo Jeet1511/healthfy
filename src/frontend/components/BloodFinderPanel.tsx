@@ -48,22 +48,22 @@ export function BloodFinderPanel({ isOpen, onClose }: BloodFinderPanelProps) {
       <section className="panel-shell">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Resource Monitor</p>
-            <h3 className="text-lg font-semibold text-slate-100">Blood Availability</h3>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Resource Monitor</p>
+            <h3 className="text-lg font-semibold text-slate-900">Blood Availability</h3>
           </div>
           <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${stockStatus.className}`}>
             {stockStatus.label}
           </span>
         </div>
 
-        <p className="text-sm text-slate-300">
-          Matching sources for <span className="font-semibold text-slate-100">{bloodGroup}</span>: {results.length}
+        <p className="text-sm text-slate-600">
+          Matching sources for <span className="font-semibold text-slate-900">{bloodGroup}</span>: {results.length}
         </p>
 
         {loading ? (
           <div className="mt-3 h-12 rounded-lg shimmer-block" />
         ) : (
-          <div className="mt-3 space-y-1 text-sm text-slate-300">
+          <div className="mt-3 space-y-1 text-sm text-slate-600">
             {results.slice(0, 2).map((item) => (
               <p key={item.id}>• {item.name} ({item.distanceKm} km)</p>
             ))}
@@ -89,8 +89,8 @@ export function BloodFinderPanel({ isOpen, onClose }: BloodFinderPanelProps) {
             >
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Blood Request Flow</p>
-                  <h3 className="text-lg font-semibold text-slate-100">Need Blood</h3>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Blood Request Flow</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Need Blood</h3>
                 </div>
                 <button type="button" onClick={onClose} className="quick-pill">
                   Close
@@ -98,11 +98,11 @@ export function BloodFinderPanel({ isOpen, onClose }: BloodFinderPanelProps) {
               </div>
 
               <div className="mb-4 flex items-center gap-3">
-                <label className="text-sm text-slate-300">Blood Group</label>
+                <label className="text-sm text-slate-600">Blood Group</label>
                 <select
                   value={bloodGroup}
                   onChange={(event) => setBloodGroup(event.target.value)}
-                  className="rounded-lg border border-white/20 bg-slate-900/60 px-3 py-2 text-sm text-slate-100"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                 >
                   {bloodGroups.map((group) => (
                     <option key={group}>{group}</option>
@@ -111,7 +111,7 @@ export function BloodFinderPanel({ isOpen, onClose }: BloodFinderPanelProps) {
               </div>
 
               <div className="grid gap-4 md:grid-cols-5">
-                <div className="md:col-span-3 overflow-hidden rounded-xl border border-white/10">
+                <div className="md:col-span-3 overflow-hidden rounded-xl border border-slate-200">
                   <iframe
                     title="Blood map"
                     src={`https://www.google.com/maps?q=${encodeURIComponent(`${bloodGroup} blood bank near me`)}&z=12&output=embed`}
@@ -129,10 +129,10 @@ export function BloodFinderPanel({ isOpen, onClose }: BloodFinderPanelProps) {
                     </>
                   ) : (
                     results.slice(0, 5).map((item) => (
-                      <div key={item.id} className="rounded-lg border border-white/10 bg-slate-900/40 p-3">
-                        <p className="text-sm font-semibold text-slate-100">{item.name}</p>
-                        <p className="text-xs text-slate-300">{item.type} • {item.distanceKm} km</p>
-                        <p className="mt-1 text-xs text-slate-300">{item.phone}</p>
+                      <div key={item.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                        <p className="text-xs text-slate-600">{item.type} • {item.distanceKm} km</p>
+                        <p className="mt-1 text-xs text-slate-600">{item.phone}</p>
                       </div>
                     ))
                   )}

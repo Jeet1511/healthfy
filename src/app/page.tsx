@@ -43,7 +43,7 @@ const scenarios = [
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-command text-slate-100">
+    <div className="relative min-h-screen overflow-hidden bg-command text-slate-800">
       <div className="floating-light left-[-120px] top-16 h-72 w-72" />
       <div className="floating-light floating-light-alt right-[-140px] top-72 h-80 w-80" />
       <div className="blood-flow right-16 top-[34rem] h-52 w-52" />
@@ -62,11 +62,11 @@ export default function LandingPage() {
             </svg>
           </div>
           <div className="section-divider" />
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">LifeLine Platform</p>
-          <h1 className="mt-2 max-w-3xl text-4xl font-semibold leading-tight md:text-5xl">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">LifeLine Platform</p>
+          <h1 className="mt-2 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 md:text-5xl">
             When seconds matter, LifeLine responds.
           </h1>
-          <p className="mt-4 max-w-2xl text-slate-300">
+          <p className="mt-4 max-w-2xl text-slate-600">
             A smart emergency and healthcare platform that combines AI triage, blood intelligence, and crisis response into one trusted system.
           </p>
 
@@ -76,16 +76,16 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl bg-white/8 p-3">
-              <p className="text-xs text-slate-300">Live System</p>
-              <p className="mt-1 text-sm"><span className="status-dot status-dot-active" />AI triage operational</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Live System</p>
+              <p className="mt-1 text-sm text-slate-700"><span className="status-dot status-dot-active" />AI triage operational</p>
             </div>
-            <div className="rounded-xl bg-white/8 p-3">
-              <p className="text-xs text-slate-300">Care Network</p>
-              <p className="mt-1 text-sm"><span className="status-dot status-dot-safe" />500+ hospitals connected</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Care Network</p>
+              <p className="mt-1 text-sm text-slate-700"><span className="status-dot status-dot-safe" />500+ hospitals connected</p>
             </div>
-            <div className="rounded-xl bg-white/8 p-3">
-              <p className="text-xs text-slate-300">Emergency Readiness</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Emergency Readiness</p>
               <p className="mt-1 text-sm warm-caption"><span className="status-dot status-dot-critical" />Real-time response system</p>
             </div>
           </div>
@@ -102,27 +102,27 @@ export default function LandingPage() {
               className="panel-shell feature-card"
             >
               <p className="text-2xl">{feature.icon}</p>
-              <h2 className="text-lg font-semibold text-slate-100">{feature.title}</h2>
-              <p className="mt-2 text-sm text-slate-300">{feature.description}</p>
+              <h2 className="text-lg font-semibold text-slate-900">{feature.title}</h2>
+              <p className="mt-2 text-sm text-slate-600">{feature.description}</p>
             </motion.article>
           ))}
         </section>
 
         <section className="mt-6 panel-shell">
           <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-100">How it works</h2>
+          <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-slate-900/35 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Step 1</p>
-              <p className="mt-1 text-sm">Describe your emergency scenario in plain language.</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 1</p>
+              <p className="mt-1 text-sm text-slate-700">Describe your emergency scenario in plain language.</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/35 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Step 2</p>
-              <p className="mt-1 text-sm">LifeLine AI classifies urgency and suggests immediate actions.</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 2</p>
+              <p className="mt-1 text-sm text-slate-700">LifeLine AI classifies urgency and suggests immediate actions.</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/35 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Step 3</p>
-              <p className="mt-1 text-sm">Connect to nearby resources: hospitals, blood banks, and crisis contacts.</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 3</p>
+              <p className="mt-1 text-sm text-slate-700">Connect to nearby resources: hospitals, blood banks, and crisis contacts.</p>
             </div>
           </div>
         </section>
@@ -130,46 +130,46 @@ export default function LandingPage() {
         <section className="mt-6 panel-shell relative overflow-hidden">
           <div className="blood-flow left-[-30px] top-[10px] h-40 w-40" />
           <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-100">Trusted Emergency System</h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
+          <h2 className="text-2xl font-semibold text-slate-900">Trusted Emergency System</h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600">
             Built to guide people calmly in high-stress moments with verified pathways to care, response teams, and resource intelligence.
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
-              <p className="text-xs text-slate-400">Connected Care</p>
-              <p className="mt-1 text-lg font-semibold text-slate-100">500+ hospitals</p>
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs text-slate-500">Connected Care</p>
+              <p className="mt-1 text-lg font-semibold text-slate-900">500+ hospitals</p>
             </article>
-            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
-              <p className="text-xs text-slate-400">Response Engine</p>
-              <p className="mt-1 text-lg font-semibold text-slate-100">Real-time triage</p>
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs text-slate-500">Response Engine</p>
+              <p className="mt-1 text-lg font-semibold text-slate-900">Real-time triage</p>
             </article>
-            <article className="rounded-xl border border-white/10 bg-slate-900/30 p-4">
-              <p className="text-xs text-slate-400">Support Coverage</p>
-              <p className="mt-1 text-lg font-semibold text-slate-100">24×7 emergency flow</p>
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs text-slate-500">Support Coverage</p>
+              <p className="mt-1 text-lg font-semibold text-slate-900">24×7 emergency flow</p>
             </article>
           </div>
         </section>
 
         <section className="mt-6 panel-shell">
           <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-100">Real-life scenarios</h2>
+          <h2 className="text-2xl font-semibold text-slate-900">Real-life scenarios</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {scenarios.map((item) => (
-              <article key={item.title} className="rounded-xl border border-white/10 bg-slate-900/35 p-4">
-                <h3 className="font-medium text-slate-100">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-300">{item.text}</p>
+              <article key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="font-medium text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{item.text}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <footer className="mt-8 border-t border-white/10 pt-4 text-sm text-slate-400">
+        <footer className="mt-8 border-t border-slate-200 pt-4 text-sm text-slate-500">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p>LifeLine © 2026 · Smart Emergency & Healthcare Platform</p>
             <div className="flex gap-3">
-              <Link href="/platform" className="hover:text-slate-200">Platform</Link>
-              <Link href="/platform/profile" className="hover:text-slate-200">Profile</Link>
-              <a href="mailto:care@lifeline.health" className="hover:text-slate-200">Contact</a>
+              <Link href="/platform" className="hover:text-slate-700">Platform</Link>
+              <Link href="/platform/profile" className="hover:text-slate-700">Profile</Link>
+              <a href="mailto:care@lifeline.health" className="hover:text-slate-700">Contact</a>
             </div>
           </div>
         </footer>

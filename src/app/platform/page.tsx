@@ -13,7 +13,7 @@ export default function PlatformDashboardPage() {
   return (
     <div className="grid gap-4 lg:grid-cols-5">
       <section className="panel-shell lg:col-span-3">
-        <h3 className="text-xl font-semibold text-slate-100">Quick Actions</h3>
+        <h3 className="text-xl font-semibold text-slate-900">Quick Actions</h3>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <Link href="/platform/emergency-ai" className="quick-tile">⚕ Report Emergency</Link>
           <Link href="/platform/blood-finder" className="quick-tile">🩸 Find Blood</Link>
@@ -21,15 +21,15 @@ export default function PlatformDashboardPage() {
         </div>
 
         <div className="mt-5">
-          <h4 className="text-sm font-semibold text-slate-200">Recent Activity</h4>
-          <ul className="mt-2 space-y-2 text-sm text-slate-300">
+          <h4 className="text-sm font-semibold text-slate-700">Recent Activity</h4>
+          <ul className="mt-2 space-y-2 text-sm text-slate-600">
             {activity.map((item, index) => (
               <motion.li
                 key={item}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08 }}
-                className="rounded-lg border border-white/10 bg-slate-900/35 p-3"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-3"
               >
                 {item}
               </motion.li>
@@ -39,19 +39,19 @@ export default function PlatformDashboardPage() {
       </section>
 
       <section className="panel-shell lg:col-span-2">
-        <h3 className="text-xl font-semibold text-slate-100">System Status</h3>
+        <h3 className="text-xl font-semibold text-slate-900">System Status</h3>
         <div className="mt-4 space-y-3 text-sm">
-          <div className="rounded-xl border border-white/10 bg-slate-900/35 p-3">
-            <p className="text-slate-400">AI Triage Engine</p>
-            <p className="mt-1 text-emerald-300">Operational · Avg response 4.3s</p>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-slate-500">AI Triage Engine</p>
+            <p className="mt-1 text-emerald-600">Operational · Avg response 4.3s</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-slate-900/35 p-3">
-            <p className="text-slate-400">Location Services</p>
-            <p className="mt-1 text-sky-300">Synced · 16 resources indexed</p>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-slate-500">Location Services</p>
+            <p className="mt-1 text-cyan-600">Synced · 16 resources indexed</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-slate-900/35 p-3">
-            <p className="text-slate-400">Emergency Lines</p>
-            <p className="mt-1 text-amber-300">Monitored · Ambulance/Police/Fire active</p>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-slate-500">Emergency Lines</p>
+            <p className="mt-1 text-red-600">Monitored · Ambulance/Police/Fire active</p>
           </div>
         </div>
       </section>

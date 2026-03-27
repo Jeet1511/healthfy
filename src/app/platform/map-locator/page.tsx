@@ -28,7 +28,7 @@ export default function MapLocatorPage() {
   return (
     <div className="panel-shell">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-xl font-semibold text-slate-100">Map Locator</h3>
+        <h3 className="text-xl font-semibold text-slate-900">Map Locator</h3>
         <div className="flex gap-2">
           {resourceTypes.map((type) => (
             <button
@@ -44,7 +44,7 @@ export default function MapLocatorPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 overflow-hidden rounded-xl border border-white/10">
+        <div className="xl:col-span-8 overflow-hidden rounded-xl border border-slate-200">
           <iframe
             title="Resource map"
             src={`https://www.google.com/maps?q=${encodeURIComponent(selected ? `${selected.latitude},${selected.longitude}` : `${selectedType} near me`)}&z=12&output=embed`}
@@ -62,13 +62,13 @@ export default function MapLocatorPage() {
               onClick={() => setSelectedId(item.id)}
               className={`w-full rounded-xl border p-3 text-left transition ${
                 selected?.id === item.id
-                  ? "border-sky-400/50 bg-sky-500/10"
-                  : "border-white/10 bg-slate-900/35 hover:bg-white/5"
+                  ? "border-blue-300 bg-blue-50"
+                  : "border-slate-200 bg-slate-50 hover:bg-blue-50/50"
               }`}
             >
-              <p className="font-medium text-slate-100">{item.name}</p>
-              <p className="text-xs text-slate-300">{item.address}</p>
-              <p className="mt-1 text-xs text-sky-200">{item.distanceKm} km · {item.phone}</p>
+              <p className="font-medium text-slate-900">{item.name}</p>
+              <p className="text-xs text-slate-600">{item.address}</p>
+              <p className="mt-1 text-xs text-blue-600">{item.distanceKm} km · {item.phone}</p>
             </button>
           ))}
         </div>

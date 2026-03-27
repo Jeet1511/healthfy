@@ -44,13 +44,13 @@ export function LiveMap({ triage, highlightBlood }: LiveMapProps) {
     <section className="panel-shell h-80 overflow-hidden">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Live Intelligence</p>
-          <h3 className="text-lg font-semibold text-slate-100">Live Map</h3>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Live Intelligence</p>
+          <h3 className="text-lg font-semibold text-slate-900">Live Map</h3>
         </div>
-        <span className="text-xs text-slate-300">{visible.length} nearby resources</span>
+        <span className="text-xs text-slate-600">{visible.length} nearby resources</span>
       </div>
 
-      <div className="relative h-60 overflow-hidden rounded-xl border border-white/10">
+      <div className="relative h-60 overflow-hidden rounded-xl border border-slate-200">
         <iframe
           title="Live emergency map"
           src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=12&output=embed`}

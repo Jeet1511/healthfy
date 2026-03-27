@@ -80,9 +80,9 @@ export function EmergencyChat({ onResponse, onAction }: EmergencyChatProps) {
 
   return (
     <section className="panel-shell flex h-[calc(100vh-12.5rem)] min-h-155 flex-col">
-      <div className="border-b border-white/10 pb-4">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Primary Action</p>
-        <h2 className="mt-1 text-xl font-semibold text-slate-100">Emergency AI Assistant</h2>
+      <div className="border-b border-slate-200 pb-4">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Primary Action</p>
+        <h2 className="mt-1 text-xl font-semibold text-slate-900">Emergency AI Assistant</h2>
       </div>
 
       <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
@@ -96,7 +96,7 @@ export function EmergencyChat({ onResponse, onAction }: EmergencyChatProps) {
               transition={{ duration: 0.35 }}
               className={message.role === "user" ? "chat-message-user" : "chat-message-assistant"}
             >
-              <p className="text-sm leading-relaxed text-slate-100">{message.content}</p>
+              <p className="text-sm leading-relaxed text-slate-800">{message.content}</p>
 
               {message.response ? (
                 <div className="mt-3 space-y-2">
@@ -104,7 +104,7 @@ export function EmergencyChat({ onResponse, onAction }: EmergencyChatProps) {
                     {message.response.urgency === "Critical" ? "⚠️" : "•"} {message.response.urgency}
                   </span>
 
-                  <ul className="space-y-1 text-sm text-slate-200">
+                  <ul className="space-y-1 text-sm text-slate-700">
                     {message.response.steps.map((step) => (
                       <li key={step}>• {step}</li>
                     ))}
@@ -139,13 +139,13 @@ export function EmergencyChat({ onResponse, onAction }: EmergencyChatProps) {
         ) : null}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3 border-t border-white/10 pt-4">
+      <form onSubmit={handleSubmit} className="mt-4 space-y-3 border-t border-slate-200 pt-4">
         <div className="input-shell">
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Describe your situation…"
-            className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-400"
+            className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
           />
           <motion.button whileTap={{ scale: 0.95 }} type="submit" className="primary-btn">
             Analyze

@@ -25,8 +25,8 @@ export function GlobalTopNav() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [sessionLabel, setSessionLabel] = useState("Guest User");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const sessionLabel = "Guest User";
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);
@@ -36,9 +36,18 @@ export function GlobalTopNav() {
   }, []);
 
   useEffect(() => {
-    const session = localStorage.getItem("lifeline-session") ?? "guest";
-    setSessionLabel(session === "user" ? "Jeet Sharma" : "Guest User");
-  }, [pathname]);
+    const storedTheme = localStorage.getItem("lifeline-theme") as "light" | "dark" | null;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const resolvedTheme = storedTheme ?? (prefersDark ? "dark" : "light");
+    document.documentElement.dataset.theme = resolvedTheme;
+  }, []);
+
+  const toggleTheme = () => {
+    const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    const nextTheme = current === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem("lifeline-theme", nextTheme);
+  };
 
   useEffect(() => {
     const onDocClick = (event: MouseEvent) => {
@@ -63,7 +72,7 @@ export function GlobalTopNav() {
       <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-3 px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
           <span className="logo-dot" />
-          <span className="text-base font-semibold tracking-wide text-slate-100">LifeLine</span>
+          <span className="text-base font-semibold tracking-wide text-slate-800">LifeLine</span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -79,7 +88,7 @@ export function GlobalTopNav() {
           ))}
         </nav>
 
-        <nav className="scrollbar-none absolute bottom-[-2.05rem] left-0 right-0 flex gap-1 overflow-x-auto border-t border-white/10 bg-slate-950/85 px-3 py-1.5 lg:hidden">
+        <nav className="scrollbar-none absolute bottom-[-2.05rem] left-0 right-0 flex gap-1 overflow-x-auto border-t border-slate-200 bg-white/95 px-3 py-1.5 lg:hidden">
           {links.map((link) => (
             <Link
               key={`mobile-${link.href}`}
@@ -92,42 +101,48 @@ export function GlobalTopNav() {
           ))}
         </nav>
 
-        <div ref={dropdownRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="profile-trigger relative"
-          >
-            <span className="avatar-circle">JS</span>
-            <span className="status-dot status-dot-safe absolute right-[-2px] top-[-2px]" aria-hidden />
-            <span className="hidden text-left sm:block">
-              <span className="block text-xs text-slate-300">{sessionLabel}</span>
-              <span className="block text-[11px] text-emerald-300">💓 Active · Safe</span>
-            </span>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={toggleTheme} className="quick-pill" aria-label="Toggle theme">
+            🌓 Theme
           </button>
 
-          {open ? (
-            <div className="profile-menu">
-              <p className="text-sm font-semibold text-slate-100">{sessionLabel}</p>
-              <p className="text-xs text-emerald-300">Status: 💓 Active / Safe</p>
+          <div ref={dropdownRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              className="profile-trigger relative"
+            >
+              <span className="avatar-circle">JS</span>
+              <span className="status-dot status-dot-safe absolute -right-0.5 -top-0.5" aria-hidden />
+              <span className="hidden text-left sm:block">
+                <span className="block text-xs text-slate-700">{sessionLabel}</span>
+                <span className="block text-[11px] text-emerald-600">💓 Active · Safe</span>
+              </span>
+            </button>
 
-              <div className="mt-3 space-y-1 border-t border-white/10 pt-2">
-                <Link href="/platform/profile" className="profile-menu-item" onClick={() => setOpen(false)}>
-                  👤 My Profile
-                </Link>
-                <Link href="/platform/settings" className="profile-menu-item" onClick={() => setOpen(false)}>
-                  ⚙ Settings
-                </Link>
-                <button type="button" className="profile-menu-item w-full text-left" onClick={logout}>
-                  ↩ Logout
-                </button>
-              </div>
+            {open ? (
+              <div className="profile-menu">
+                <p className="text-sm font-semibold text-slate-800">{sessionLabel}</p>
+                <p className="text-xs text-emerald-600">Status: 💓 Active / Safe</p>
 
-              <div className="mt-2 border-t border-white/10 pt-2 text-[11px] text-slate-400">
-                Quick: <Link href="/platform/emergency-ai" onClick={() => setOpen(false)} className="text-sky-300">Emergency AI</Link>
+                <div className="mt-3 space-y-1 border-t border-slate-200 pt-2">
+                  <Link href="/platform/profile" className="profile-menu-item" onClick={() => setOpen(false)}>
+                    👤 My Profile
+                  </Link>
+                  <Link href="/platform/settings" className="profile-menu-item" onClick={() => setOpen(false)}>
+                    ⚙ Settings
+                  </Link>
+                  <button type="button" className="profile-menu-item w-full text-left" onClick={logout}>
+                    ↩ Logout
+                  </button>
+                </div>
+
+                <div className="mt-2 border-t border-slate-200 pt-2 text-[11px] text-slate-500">
+                  Quick: <Link href="/platform/emergency-ai" onClick={() => setOpen(false)} className="text-blue-600">Emergency AI</Link>
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
       <div className="heartbeat-strip" aria-hidden>

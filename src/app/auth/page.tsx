@@ -23,8 +23,8 @@ export default function AuthPage() {
           transition={{ duration: 0.45 }}
           className="panel-shell"
         >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Entry</p>
-          <h1 className="mt-1 text-2xl font-semibold text-slate-100">Welcome to LifeLine</h1>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Entry</p>
+          <h1 className="mt-1 text-2xl font-semibold text-slate-900">Welcome to LifeLine</h1>
 
           <div className="mt-4 flex gap-2">
             <button

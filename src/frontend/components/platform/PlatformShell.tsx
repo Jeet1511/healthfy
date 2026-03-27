@@ -50,9 +50,9 @@ export function PlatformShell({ children }: PlatformShellProps) {
     <div className="min-h-screen bg-command px-4 py-4 md:px-6">
       <div className="mx-auto grid max-w-screen-2xl gap-4 xl:grid-cols-[260px_1fr_300px]">
         <aside className="panel-shell sticky top-24 flex h-[calc(100vh-7rem)] flex-col">
-          <Link href="/" className="mb-6 block border-b border-white/10 pb-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">LifeLine</p>
-            <h1 className="text-xl font-semibold text-slate-100">Response Platform</h1>
+          <Link href="/" className="mb-6 block border-b border-slate-200 pb-4">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">LifeLine</p>
+            <h1 className="text-xl font-semibold text-slate-900">Response Platform</h1>
           </Link>
 
           <nav className="space-y-1.5">
@@ -68,14 +68,14 @@ export function PlatformShell({ children }: PlatformShellProps) {
                 >
                   <span aria-hidden>{item.icon}</span>
                   <span>{item.label}</span>
-                  {hovered === item.href && !active ? <span className="ml-auto text-xs text-slate-400">↗</span> : null}
+                  {hovered === item.href && !active ? <span className="ml-auto text-xs text-slate-500">↗</span> : null}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="mt-auto space-y-3 border-t border-white/10 pt-4">
-            <p className="text-xs text-slate-400">Session: <span className="text-slate-200">{sessionType}</span></p>
+          <div className="mt-auto space-y-3 border-t border-slate-200 pt-4">
+            <p className="text-xs text-slate-500">Session: <span className="text-slate-800">{sessionType}</span></p>
             <button type="button" className="quick-pill w-full text-left" onClick={signOut}>
               Sign out
             </button>
@@ -86,8 +86,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
           <header className="status-shell">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Platform</p>
-                <h2 className="text-2xl font-semibold text-slate-100">{title}</h2>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Platform</p>
+                <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
               </div>
               <div className="flex items-center gap-2">
                 <span className="status-chip status-chip-live">AI Active</span>
@@ -110,21 +110,21 @@ export function PlatformShell({ children }: PlatformShellProps) {
         </section>
 
         <aside className="panel-shell sticky top-24 h-[calc(100vh-7rem)]">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Context Panel</p>
-          <h3 className="mt-1 text-lg font-semibold text-slate-100">Live System Intel</h3>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Context Panel</p>
+          <h3 className="mt-1 text-lg font-semibold text-slate-900">Live System Intel</h3>
 
-          <div className="mt-4 space-y-3 text-sm text-slate-300">
-            <div className="rounded-xl border border-white/10 bg-slate-900/40 p-3">
-              <p className="text-xs text-slate-400">Emergency Queue</p>
-              <p className="mt-1 font-medium text-slate-100">3 active incidents</p>
+          <div className="mt-4 space-y-3 text-sm text-slate-700">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Emergency Queue</p>
+              <p className="mt-1 font-medium text-slate-900">3 active incidents</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/40 p-3">
-              <p className="text-xs text-slate-400">Nearest Trauma Unit</p>
-              <p className="mt-1 font-medium text-slate-100">Rapid Trauma Institute · 4.1 km</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Nearest Trauma Unit</p>
+              <p className="mt-1 font-medium text-slate-900">Rapid Trauma Institute · 4.1 km</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/40 p-3">
-              <p className="text-xs text-slate-400">Blood Alert</p>
-              <p className="mt-1 font-medium text-slate-100">O- stock low in 2 centers</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500">Blood Alert</p>
+              <p className="mt-1 font-medium text-slate-900">O- stock low in 2 centers</p>
             </div>
           </div>
         </aside>

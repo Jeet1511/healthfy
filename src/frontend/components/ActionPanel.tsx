@@ -19,8 +19,8 @@ export function ActionPanel({ triage, onAction, onActivateCrisis }: ActionPanelP
   return (
     <section className="panel-shell">
       <div className="mb-4">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Rapid Response</p>
-        <h3 className="text-lg font-semibold text-slate-100">Action Panel</h3>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Rapid Response</p>
+        <h3 className="text-lg font-semibold text-slate-900">Action Panel</h3>
       </div>
 
       <div className="space-y-2">
@@ -33,16 +33,16 @@ export function ActionPanel({ triage, onAction, onActivateCrisis }: ActionPanelP
             className="action-btn"
           >
             <div>
-              <p className="text-sm font-medium text-slate-100">{contact.label}</p>
-              <p className="text-xs text-slate-400"><span className={`status-dot ${contact.dot}`} />Nearest unit: {contact.distance}</p>
+              <p className="text-sm font-medium text-slate-900">{contact.label}</p>
+              <p className="text-xs text-slate-500"><span className={`status-dot ${contact.dot}`} />Nearest unit: {contact.distance}</p>
             </div>
-            <p className="text-sm font-semibold text-slate-200">{contact.number}</p>
+            <p className="text-sm font-semibold text-slate-700">{contact.number}</p>
           </motion.button>
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-white/10 bg-slate-900/30 p-3 text-sm text-slate-300">
-        Current AI classification: <span className="font-semibold text-slate-100">{triage?.urgency ?? "Awaiting input"}</span>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+        Current AI classification: <span className="font-semibold text-slate-900">{triage?.urgency ?? "Awaiting input"}</span>
       </div>
 
       <button type="button" className="mt-4 w-full crisis-btn" onClick={onActivateCrisis}>
