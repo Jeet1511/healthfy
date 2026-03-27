@@ -89,6 +89,28 @@ export const MOCK_RESOURCES: HealthcareResource[] = [
     longitude: 77.1544,
     bloodGroupsAvailable: ["A+", "O+", "AB+"],
   },
+  {
+    id: "p1",
+    name: "MedPlus Emergency Pharmacy",
+    type: "Pharmacy",
+    specialty: "General",
+    address: "Connaught Place Block E",
+    phone: "+91 98765 10009",
+    latitude: 28.6315,
+    longitude: 77.2167,
+    bloodGroupsAvailable: [],
+  },
+  {
+    id: "p2",
+    name: "24x7 Care Pharmacy",
+    type: "Pharmacy",
+    specialty: "General",
+    address: "Karol Bagh Main Road",
+    phone: "+91 98765 10010",
+    latitude: 28.6518,
+    longitude: 77.1902,
+    bloodGroupsAvailable: [],
+  },
 ];
 
 export const CRISIS_PLAYBOOKS: CrisisPlaybook[] = [

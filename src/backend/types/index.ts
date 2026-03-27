@@ -1,6 +1,6 @@
 export type UrgencyLevel = "Safe" | "Moderate" | "Critical";
 
-export type ResourceType = "Hospital" | "Clinic" | "Doctor" | "Blood Bank";
+export type ResourceType = "Hospital" | "Clinic" | "Doctor" | "Blood Bank" | "Pharmacy";
 
 export interface EmergencyResponse {
   urgency: UrgencyLevel;
