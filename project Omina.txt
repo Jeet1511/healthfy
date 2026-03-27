@@ -1,0 +1,3 @@
+mongo db
+mongodb+srv://omina:omina2580@omina.enbmork.mongodb.net/?appName=Omina
+
