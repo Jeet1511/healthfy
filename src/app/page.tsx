@@ -1,179 +1,34 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-
-const features = [
-  {
-    icon: "⚕",
-    title: "Emergency AI",
-    description: "Instant urgency detection with clear actions when every second matters.",
-  },
-  {
-    icon: "🩸",
-    title: "Blood Finder",
-    description: "Find nearest blood sources with availability indicators and map guidance.",
-  },
-  {
-    icon: "🚨",
-    title: "Crisis Mode",
-    description: "High-contrast emergency protocol with step-by-step response flows.",
-  },
-  {
-    icon: "🗺",
-    title: "Smart Map",
-    description: "Live geo-intelligence for hospitals, clinics, pharmacies, and response routes.",
-  },
-];
-
-const scenarios = [
-  {
-    title: "Chest pain at home",
-    text: "AI detects high risk and suggests immediate ambulance escalation.",
-  },
-  {
-    title: "Urgent blood request",
-    text: "Nearest matching blood sources appear instantly with availability status.",
-  },
-  {
-    title: "Road accident alert",
-    text: "Crisis mode launches a rapid protocol with one-tap emergency contacts.",
-  },
-];
+import { PlatformHero } from "@/frontend/components/home/PlatformHero";
+import { DoctorSection } from "@/frontend/components/home/DoctorSection";
+import { HospitalSection } from "@/frontend/components/home/HospitalSection";
+import { ResourceNetwork } from "@/frontend/components/home/ResourceNetwork";
+import { AiAssistantSection } from "@/frontend/components/home/AiAssistantSection";
+import { ScrollBloodDrop } from "@/frontend/components/home/ScrollBloodDrop";
+import { Footer } from "@/frontend/components/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-command text-slate-800">
-      <div className="floating-light left-[-120px] top-16 h-72 w-72" />
-      <div className="floating-light floating-light-alt right-[-140px] top-72 h-80 w-80" />
-      <div className="blood-flow right-16 top-[34rem] h-52 w-52" />
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#f8fafc] selection:bg-blue-200">
+      <ScrollBloodDrop />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="panel-shell relative overflow-hidden"
-        >
-          <div className="medical-illustration" aria-hidden />
-          <div className="hero-ecg" aria-hidden>
-            <svg viewBox="0 0 1000 120" preserveAspectRatio="none">
-              <path d="M0 70 L120 70 L160 68 L190 22 L220 98 L260 46 L300 70 L1000 70" />
-            </svg>
-          </div>
-          <div className="section-divider" />
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">LifeLine Platform</p>
-          <h1 className="mt-2 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 md:text-5xl">
-            When seconds matter, LifeLine responds.
-          </h1>
-          <p className="mt-4 max-w-2xl text-slate-600">
-            A smart emergency and healthcare platform that combines AI triage, blood intelligence, and crisis response into one trusted system.
-          </p>
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[40px_40px] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/auth" className="primary-btn">Get Help Now</Link>
-            <Link href="/platform" className="quick-pill px-4 py-2 text-sm">Explore Platform</Link>
-          </div>
+        <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-blue-400/20 blur-[120px] mix-blend-multiply" />
+        <div className="absolute right-[-10%] top-[20%] h-[60%] w-[40%] rounded-full bg-teal-400/20 blur-[120px] mix-blend-multiply" />
+        <div className="absolute bottom-[-10%] left-[20%] h-[40%] w-[60%] rounded-full bg-sky-300/20 blur-[120px] mix-blend-multiply" />
+      </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Live System</p>
-              <p className="mt-1 text-sm text-slate-700"><span className="status-dot status-dot-active" />AI triage operational</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Care Network</p>
-              <p className="mt-1 text-sm text-slate-700"><span className="status-dot status-dot-safe" />500+ hospitals connected</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Emergency Readiness</p>
-              <p className="mt-1 text-sm warm-caption"><span className="status-dot status-dot-critical" />Real-time response system</p>
-            </div>
-          </div>
-        </motion.section>
-
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {features.map((feature, index) => (
-            <motion.article
-              key={feature.title}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: index * 0.08 }}
-              className="panel-shell feature-card"
-            >
-              <p className="text-2xl">{feature.icon}</p>
-              <h2 className="text-lg font-semibold text-slate-900">{feature.title}</h2>
-              <p className="mt-2 text-sm text-slate-600">{feature.description}</p>
-            </motion.article>
-          ))}
-        </section>
-
-        <section className="mt-6 panel-shell">
-          <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 1</p>
-              <p className="mt-1 text-sm text-slate-700">Describe your emergency scenario in plain language.</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 2</p>
-              <p className="mt-1 text-sm text-slate-700">LifeLine AI classifies urgency and suggests immediate actions.</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Step 3</p>
-              <p className="mt-1 text-sm text-slate-700">Connect to nearby resources: hospitals, blood banks, and crisis contacts.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-6 panel-shell relative overflow-hidden">
-          <div className="blood-flow left-[-30px] top-[10px] h-40 w-40" />
-          <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-900">Trusted Emergency System</h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Built to guide people calmly in high-stress moments with verified pathways to care, response teams, and resource intelligence.
-          </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Connected Care</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">500+ hospitals</p>
-            </article>
-            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Response Engine</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">Real-time triage</p>
-            </article>
-            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Support Coverage</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">24×7 emergency flow</p>
-            </article>
-          </div>
-        </section>
-
-        <section className="mt-6 panel-shell">
-          <div className="section-divider" />
-          <h2 className="text-2xl font-semibold text-slate-900">Real-life scenarios</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {scenarios.map((item) => (
-              <article key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h3 className="font-medium text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <footer className="mt-8 border-t border-slate-200 pt-4 text-sm text-slate-500">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p>LifeLine © 2026 · Smart Emergency & Healthcare Platform</p>
-            <div className="flex gap-3">
-              <Link href="/platform" className="hover:text-slate-700">Platform</Link>
-              <Link href="/platform/profile" className="hover:text-slate-700">Profile</Link>
-              <a href="mailto:care@lifeline.health" className="hover:text-slate-700">Contact</a>
-            </div>
-          </div>
-        </footer>
-      </main>
+      <div className="relative z-10">
+        <PlatformHero />
+        <DoctorSection />
+        <HospitalSection />
+        <ResourceNetwork />
+        <AiAssistantSection />
+        <Footer />
+      </div>
     </div>
   );
 }
