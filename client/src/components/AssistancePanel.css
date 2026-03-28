@@ -1,7 +1,7 @@
 .assistance-toggle {
     position: fixed;
     bottom: 24px;
-    right: 24px;
+    left: 24px;
     z-index: 9999;
     padding: 12px 24px;
     background: linear-gradient(135deg, rgba(8, 11, 20, 0.8), rgba(28, 40, 70, 0.8));
@@ -30,7 +30,7 @@
 .assistance-panel {
     position: fixed;
     bottom: 24px;
-    right: 24px;
+    left: 24px;
     width: 380px;
     height: 600px;
     max-height: calc(100vh - 48px);
