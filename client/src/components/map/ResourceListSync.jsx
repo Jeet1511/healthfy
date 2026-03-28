@@ -1,8 +1,14 @@
 const typeTone = {
+  doctor: "tone-safe",
+  clinic: "tone-safe",
   hospital: "tone-safe",
+  pharmacy: "tone-safe",
+  bloodbank: "tone-warning",
   police: "tone-warning",
   fire: "tone-danger",
   shelter: "tone-safe",
+  helpcenter: "tone-warning",
+  community: "tone-warning",
 };
 
 export default function ResourceListSync({ resources, selectedId, onSelect, onHover, loading }) {

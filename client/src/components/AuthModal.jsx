@@ -19,7 +19,7 @@ export default function AuthModal({ open, onClose }) {
       if (mode === "login") {
         await login({ email, password });
       } else {
-        await signup({ email, password });
+        await signup({ email, password, adminSetupKey: event.target.adminKey?.value });
       }
       onClose();
     } catch (requestError) {
@@ -70,6 +70,14 @@ export default function AuthModal({ open, onClose }) {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Password"
               />
+              {mode === "signup" && (
+                <input
+                  type="text"
+                  name="adminKey"
+                  placeholder="Admin Setup Key (Optional)"
+                  style={{ border: "1px solid rgba(220, 38, 38, 0.2)" }}
+                />
+              )}
               <button type="submit" disabled={loading} className="btn-primary">
                 {loading ? "Please wait..." : mode === "login" ? "Login" : "Signup"}
               </button>

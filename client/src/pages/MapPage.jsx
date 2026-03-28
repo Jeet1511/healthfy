@@ -6,18 +6,21 @@ import ResourceListSync from "../components/map/ResourceListSync";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Navigation, AlertOctagon } from "lucide-react";
+import { Phone, Navigation, HeartPulse, BookmarkPlus } from "lucide-react";
+import BookingModal from "../components/BookingModal";
 
 export default function MapPage() {
   const [searchParams] = useSearchParams();
   const initialType = searchParams.get("type") || "all";
-  const { track } = useAuth();
+  const initialSearch = searchParams.get("search") || "";
+  const { track, savePlace, addBooking, session } = useAuth();
   const [type, setType] = useState(initialType);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [resources, setResources] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [hoveredId, setHoveredId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -45,9 +48,22 @@ export default function MapPage() {
   }, [type, search]);
 
   const selected = useMemo(() => resources.find((item) => item.id === selectedId) || null, [resources, selectedId]);
+  const canBook = useMemo(() => selected && ["doctor", "clinic", "hospital"].includes(selected.type), [selected]);
+  const isGuest = session.mode !== "user";
   
   // Highlight map marker if hovered OR selected
   const activeMarkerId = hoveredId || selectedId;
+
+  const handleSavePlace = async () => {
+    if (!selected || isGuest) return;
+    await savePlace(selected);
+  };
+
+  const handleConfirmBooking = async (booking) => {
+    if (isGuest) return;
+    await addBooking(booking);
+    setBookingOpen(false);
+  };
 
   return (
     <>
@@ -110,10 +126,39 @@ export default function MapPage() {
               >
                 <Navigation size={18} /> Navigate
               </a>
+              <button
+                type="button"
+                className="action-pill"
+                onClick={() => handleSavePlace().catch(() => undefined)}
+                disabled={isGuest}
+                style={{ padding: "0.8rem 1.5rem", display: "inline-flex", gap: "8px", alignItems: "center" }}
+              >
+                <BookmarkPlus size={18} /> Save place
+              </button>
+              {canBook ? (
+                <button
+                  type="button"
+                  className="action-pill btn-primary"
+                  disabled={isGuest}
+                  onClick={() => setBookingOpen(true)}
+                  style={{ padding: "0.8rem 1.5rem", display: "inline-flex", gap: "8px", alignItems: "center" }}
+                >
+                  <HeartPulse size={18} /> Book appointment
+                </button>
+              ) : null}
             </div>
+            {isGuest ? <p className="subtle" style={{ width: "100%", margin: 0 }}>Sign in to save places and bookings.</p> : null}
           </motion.section>
         ) : null}
       </AnimatePresence>
+
+      <BookingModal
+        open={bookingOpen}
+        provider={selected}
+        onClose={() => setBookingOpen(false)}
+        onConfirm={handleConfirmBooking}
+        disabled={isGuest}
+      />
     </>
   );
 }

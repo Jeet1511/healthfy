@@ -26,7 +26,7 @@ function Timeline({ title, items, renderLine }) {
 }
 
 export default function ProfilePage() {
-  const { profile, fetchProfile, session, logout } = useAuth();
+  const { profile, fetchProfile, session, logout, removeSavedPlace, cancelBooking } = useAuth();
 
   useEffect(() => {
     fetchProfile().catch(() => undefined);
@@ -35,6 +35,8 @@ export default function ProfilePage() {
   const activity = useMemo(() => (profile?.activityHistory || []).slice().reverse().slice(0, 20), [profile]);
   const emergencies = useMemo(() => (profile?.emergencyLogs || []).slice().reverse().slice(0, 20), [profile]);
   const searches = useMemo(() => (profile?.searchLogs || []).slice().reverse().slice(0, 20), [profile]);
+  const savedPlaces = useMemo(() => (profile?.savedPlaces || []).slice(0, 20), [profile]);
+  const bookings = useMemo(() => (profile?.bookings || []).slice(0, 20), [profile]);
 
   return (
     <>
@@ -89,6 +91,58 @@ export default function ProfilePage() {
             </article>
           )}
         />
+      </div>
+
+      <div className="grid">
+        <section className="card">
+          <h3 className="title">Saved Places</h3>
+          {savedPlaces.length ? (
+            <div className="resource-list" style={{ maxHeight: "none" }}>
+              {savedPlaces.map((item) => (
+                <article key={item.id} className="resource-row">
+                  <div>
+                    <strong>{item.name}</strong>
+                    <p>{item.address}</p>
+                    <p style={{ fontSize: "0.85rem" }}>{item.type}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeSavedPlace(item.id).catch(() => undefined)}
+                  >
+                    Remove
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="subtle">No saved places yet.</p>
+          )}
+        </section>
+
+        <section className="card">
+          <h3 className="title">Bookings</h3>
+          {bookings.length ? (
+            <div className="resource-list" style={{ maxHeight: "none" }}>
+              {bookings.map((item) => (
+                <article key={item.id} className="resource-row">
+                  <div>
+                    <strong>{item.providerName}</strong>
+                    <p>{item.date} • {item.slot}</p>
+                    <p style={{ fontSize: "0.85rem" }}>{item.address}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => cancelBooking(item.id).catch(() => undefined)}
+                  >
+                    Cancel
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="subtle">No bookings yet.</p>
+          )}
+        </section>
       </div>
     </>
   );

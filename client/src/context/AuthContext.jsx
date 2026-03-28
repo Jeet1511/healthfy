@@ -6,6 +6,13 @@ import {
   trackGuestActivity,
   trackUserActivity,
 } from "../services/trackingService";
+import {
+  addBooking as addUserBooking,
+  cancelBooking as cancelUserBooking,
+  getUserData,
+  removePlace,
+  savePlace as saveUserPlace,
+} from "../services/userDataService";
 
 const STORAGE_KEY = "omina_session";
 const AuthContext = createContext(null);
@@ -35,15 +42,36 @@ export function AuthProvider({ children }) {
     persistSession(next);
   };
 
-  const signup = async ({ email, password }) => {
-    const response = await apiClient.post("/auth/register", { email, password, role: "user" });
+  const getIdentity = (state = session) => {
+    if (state.mode === "guest") return "guest";
+    if (state.mode === "user") return state.user?.email || "user";
+    return "";
+  };
+
+  const buildEnhancedProfile = (baseProfile, state = session) => {
+    const identity = getIdentity(state);
+    const extra = getUserData(identity);
+    return {
+      ...baseProfile,
+      savedPlaces: extra.savedPlaces || [],
+      bookings: extra.bookings || [],
+    };
+  };
+
+  const signup = async ({ email, password, adminSetupKey }) => {
+    const response = await apiClient.post("/auth/register", { 
+      email, 
+      password, 
+      role: adminSetupKey ? "admin" : "user",
+      adminSetupKey 
+    });
     const next = {
       mode: "user",
       token: response.data.token,
       user: response.data.data,
     };
     setAndPersist(next);
-    await fetchProfile(next.token);
+    await fetchProfile(next.token, next);
     return next;
   };
 
@@ -55,7 +83,7 @@ export function AuthProvider({ children }) {
       user: response.data.data,
     };
     setAndPersist(next);
-    await fetchProfile(next.token);
+    await fetchProfile(next.token, next);
     return next;
   };
 
@@ -63,7 +91,7 @@ export function AuthProvider({ children }) {
     const logs = getGuestLogs();
     const next = { mode: "guest", token: "", user: { email: "Guest", role: "guest" } };
     setAndPersist(next);
-    setProfile({
+    setProfile(buildEnhancedProfile({
       id: "guest",
       email: "Guest",
       role: "guest",
@@ -71,7 +99,7 @@ export function AuthProvider({ children }) {
       activityHistory: logs.activity,
       emergencyLogs: logs.emergency,
       searchLogs: logs.search,
-    });
+    }, next));
   };
 
   const logout = () => {
@@ -80,10 +108,12 @@ export function AuthProvider({ children }) {
     clearGuestLogs();
   };
 
-  const fetchProfile = async (tokenOverride) => {
-    const token = tokenOverride || session.token;
+  const fetchProfile = async (tokenOverride, stateOverride = null) => {
+    const state = stateOverride || session;
+    const token = tokenOverride || state.token;
+    const identity = getIdentity(state);
 
-    if (isGuest) {
+    if (state.mode === "guest") {
       const logs = getGuestLogs();
       const guestProfile = {
         id: "guest",
@@ -94,8 +124,9 @@ export function AuthProvider({ children }) {
         emergencyLogs: logs.emergency,
         searchLogs: logs.search,
       };
-      setProfile(guestProfile);
-      return guestProfile;
+      const nextGuest = buildEnhancedProfile(guestProfile, state);
+      setProfile(nextGuest);
+      return nextGuest;
     }
 
     if (!token) return null;
@@ -103,8 +134,53 @@ export function AuthProvider({ children }) {
     const response = await apiClient.get("/auth/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    setProfile(response.data.data);
-    return response.data.data;
+    const merged = {
+      ...response.data.data,
+      id: response.data.data?.id || identity,
+    };
+    const nextProfile = buildEnhancedProfile(merged, state);
+    setProfile(nextProfile);
+    return nextProfile;
+  };
+
+  const savePlace = async (place) => {
+    const identity = getIdentity();
+    if (!identity) return null;
+    saveUserPlace(identity, place);
+    await track("activity", {
+      label: `Saved place: ${place.name}`,
+      category: "saved_place",
+    }).catch(() => undefined);
+    await fetchProfile();
+    return place;
+  };
+
+  const removeSavedPlace = async (placeId) => {
+    const identity = getIdentity();
+    if (!identity) return [];
+    const next = removePlace(identity, placeId);
+    await fetchProfile();
+    return next;
+  };
+
+  const addBooking = async (booking) => {
+    const identity = getIdentity();
+    if (!identity) return null;
+    const created = addUserBooking(identity, booking);
+    await track("activity", {
+      label: `Booked ${booking.providerName || "appointment"}`,
+      category: "booking",
+    }).catch(() => undefined);
+    await fetchProfile();
+    return created;
+  };
+
+  const cancelBooking = async (bookingId) => {
+    const identity = getIdentity();
+    if (!identity) return [];
+    const next = cancelUserBooking(identity, bookingId);
+    await fetchProfile();
+    return next;
   };
 
   const track = async (type, payload) => {
@@ -132,6 +208,10 @@ export function AuthProvider({ children }) {
       logout,
       fetchProfile,
       track,
+      savePlace,
+      removeSavedPlace,
+      addBooking,
+      cancelBooking,
     }),
     [session, profile, isAuthenticated, isGuest]
   );

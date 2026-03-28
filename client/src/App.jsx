@@ -8,6 +8,15 @@ import DisasterPage from "./pages/DisasterPage";
 import AdminPage from "./pages/AdminPage";
 import EmergencyPage from "./pages/EmergencyPage";
 import ProfilePage from "./pages/ProfilePage";
+import { useAuth } from "./context/AuthContext";
+
+function AdminOnly({ children }) {
+  const { session } = useAuth();
+  if (session.user?.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -21,7 +30,14 @@ function AnimatedRoutes() {
         <Route path="/disaster" element={<PageWrapper><DisasterPage /></PageWrapper>} />
         <Route path="/map" element={<PageWrapper><MapPage /></PageWrapper>} />
         <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
-        <Route path="/admin" element={<PageWrapper><AdminPage /></PageWrapper>} />
+        <Route
+          path="/admin"
+          element={
+            <AdminOnly>
+              <PageWrapper><AdminPage /></PageWrapper>
+            </AdminOnly>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

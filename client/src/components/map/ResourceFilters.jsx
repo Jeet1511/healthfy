@@ -1,9 +1,15 @@
 const types = [
   { value: "all", label: "All" },
+  { value: "doctor", label: "Doctor" },
+  { value: "clinic", label: "Clinic" },
   { value: "hospital", label: "Hospital" },
+  { value: "pharmacy", label: "Pharmacy" },
+  { value: "bloodbank", label: "Blood Bank" },
   { value: "police", label: "Police" },
   { value: "fire", label: "Fire" },
   { value: "shelter", label: "Shelter" },
+  { value: "helpcenter", label: "Help Center" },
+  { value: "community", label: "Community" },
 ];
 
 export default function ResourceFilters({ type, search, onTypeChange, onSearchChange }) {
