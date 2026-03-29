@@ -1,71 +1,40 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import AppShell from "@/components/AppShell";
-import { useAuth } from "@/context/AuthContext";
-import { useEmergency } from "@/context/EmergencyContext";
-
-// ── General Mode Pages ──
-import { HomePage } from "@/pages/User/General";
-import { EmergencyPage } from "@/pages/User/General";
-import { SafetyPage } from "@/pages/User/General";
-import { DisasterPage } from "@/pages/User/General";
-import { MapPage } from "@/pages/User/General";
-import { ProfilePage } from "@/pages/User/General";
-
-// ── Emergency Mode Pages ──
-import { HQPage } from "@/pages/User/Emergency";
-import { AlertPage } from "@/pages/User/Emergency";
-import { ShieldPage } from "@/pages/User/Emergency";
-import { ThreatPage } from "@/pages/User/Emergency";
-import { ScanPage } from "@/pages/User/Emergency";
-import { IdPage } from "@/pages/User/Emergency";
-
-// ── Admin Panel ──
-import { AdminPage } from "@/pages/Admin";
-
-function AdminOnly({ children }) {
-  const { session } = useAuth();
-  if (session.user?.role !== "admin") {
-    return <Navigate to="/" replace />;
-  }
-  return children;
-}
+import AppShell from "./components/AppShell";
+import {
+  HomePage,
+  MapPage,
+  SafetyPage,
+  DisasterPage,
+  EmergencyPage,
+  ProfilePage,
+} from "./pages/User/General";
+import {
+  AdminLayout,
+  AdminPage,
+  UsersPage,
+  AIModelsPage,
+  SystemPage,
+} from "./pages/Admin";
 
 function AnimatedRoutes() {
   const location = useLocation();
-  const { appMode } = useEmergency();
-  const isEmergency = appMode === "emergency";
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Home / HQ */}
-        <Route path="/" element={<PageWrapper>{isEmergency ? <HQPage /> : <HomePage />}</PageWrapper>} />
-
-        {/* Emergency / ALERT */}
-        <Route path="/emergency" element={<PageWrapper>{isEmergency ? <AlertPage /> : <EmergencyPage />}</PageWrapper>} />
-
-        {/* Safety / SHIELD */}
-        <Route path="/safety" element={<PageWrapper>{isEmergency ? <ShieldPage /> : <SafetyPage />}</PageWrapper>} />
-
-        {/* Disaster / THREAT */}
-        <Route path="/disaster" element={<PageWrapper>{isEmergency ? <ThreatPage /> : <DisasterPage />}</PageWrapper>} />
-
-        {/* Map / SCAN */}
-        <Route path="/map" element={<PageWrapper>{isEmergency ? <ScanPage /> : <MapPage />}</PageWrapper>} />
-
-        {/* Profile / ID — same component in both modes */}
-        <Route path="/profile" element={<PageWrapper>{isEmergency ? <IdPage /> : <ProfilePage />}</PageWrapper>} />
-
-        {/* Admin */}
-        <Route
-          path="/admin"
-          element={
-            <AdminOnly>
-              <PageWrapper><AdminPage /></PageWrapper>
-            </AdminOnly>
-          }
-        />
+        <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+        <Route path="/emergency" element={<PageWrapper><EmergencyPage /></PageWrapper>} />
+        <Route path="/safety" element={<PageWrapper><SafetyPage /></PageWrapper>} />
+        <Route path="/disaster" element={<PageWrapper><DisasterPage /></PageWrapper>} />
+        <Route path="/map" element={<PageWrapper><MapPage /></PageWrapper>} />
+        <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
+        <Route path="/admin" element={<PageWrapper><AdminLayout /></PageWrapper>}>
+          <Route index element={<AdminPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="ai-models" element={<AIModelsPage />} />
+          <Route path="system" element={<SystemPage />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

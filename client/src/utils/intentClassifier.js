@@ -1,6 +1,7 @@
 const EMERGENCY_KEYWORDS = [
   "help",
   "attack",
+  "follow me",
   "following me",
   "unsafe",
   "danger",
