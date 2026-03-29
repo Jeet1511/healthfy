@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
-import SOSFloatingButton from "@/components/SOSFloatingButton";
-import AssistancePanel from "@/components/AssistancePanel";
-import { useAppContextState } from "@/context/EmergencyContext";
-import { useAuth } from "@/context/AuthContext";
+import SOSFloatingButton from "./SOSFloatingButton";
+import AssistancePanel from "./AssistancePanel";
+import { useAppContextState } from "../context/EmergencyContext";
+import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
-import AuthModal from "@/components/AuthModal";
+import AuthModal from "./AuthModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [

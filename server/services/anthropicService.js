@@ -1,4 +1,13 @@
-export async function anthropicService({ apiKey, model, temperature, prompt }) {
+export async function anthropicService({
+  apiKey,
+  model,
+  temperature,
+  prompt,
+  systemPrompt,
+}) {
+  const defaultSystemPrompt =
+    "You are a human assistance decision engine. Return strict JSON with keys: status, category, actions, instructions.";
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -10,8 +19,7 @@ export async function anthropicService({ apiKey, model, temperature, prompt }) {
       model,
       max_tokens: 500,
       temperature,
-      system:
-        "You are a human assistance decision engine. Return strict JSON with keys: status, category, actions, instructions.",
+      system: systemPrompt || defaultSystemPrompt,
       messages: [{ role: "user", content: prompt }],
     }),
   });
