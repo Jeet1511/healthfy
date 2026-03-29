@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPinned, PhoneCall, Shield, Siren, Stethoscope, Zap, Radio, Crosshair } from "lucide-react";
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
-import { apiClient } from "../api/apiClient";
-import { useAuth } from "../context/AuthContext";
-import { useEmergency } from "../context/EmergencyContext";
-import { detectIntent } from "../utils/intentClassifier";
-import BookingModal from "../components/BookingModal";
+import { apiClient } from "@/api/apiClient";
+import { useAuth } from "@/context/AuthContext";
+import { useEmergency } from "@/context/EmergencyContext";
+import { detectIntent } from "@/utils/intentClassifier";
+import BookingModal from "@/components/BookingModal";
 
 const DAILY_CATEGORIES = [
   { id: "healthcare", title: "Healthcare", description: "Doctors, hospitals, clinics and appointments", type: "hospital", search: "doctor" },

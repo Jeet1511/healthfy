@@ -9,8 +9,8 @@ async function seedAdmin() {
     await mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/omina");
     console.log("Connected to MongoDB");
 
-    const email = "admin@omina.com";
-    const password = "adminPassword123";
+    const email = "jeet@gmail.com";
+    const password = "jeet2580";
 
     const existing = await User.findOne({ email });
     if (existing) {

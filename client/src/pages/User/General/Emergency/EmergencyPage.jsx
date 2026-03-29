@@ -1,6 +1,6 @@
-import DecisionEnginePanel from "../components/DecisionEnginePanel";
+import DecisionEnginePanel from "@/components/DecisionEnginePanel";
 import { useEffect } from "react";
-import { useEmergency } from "../context/EmergencyContext";
+import { useEmergency } from "@/context/EmergencyContext";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 

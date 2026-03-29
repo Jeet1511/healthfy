@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import DisasterSelector from "../components/disaster/DisasterSelector";
-import InstructionCards from "../components/disaster/InstructionCards";
-import SafeZonesList from "../components/disaster/SafeZonesList";
-import { disasterData } from "../data/disasterData";
-import { useEmergency } from "../context/EmergencyContext";
+import DisasterSelector from "@/components/disaster/DisasterSelector";
+import InstructionCards from "@/components/disaster/InstructionCards";
+import SafeZonesList from "@/components/disaster/SafeZonesList";
+import { disasterData } from "@/data/disasterData";
+import { useEmergency } from "@/context/EmergencyContext";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useEmergency } from "../context/EmergencyContext";
-import FakeCallPanel from "../components/safety/FakeCallPanel";
-import LiveTrackingPanel from "../components/safety/LiveTrackingPanel";
-import PanicPanel from "../components/safety/PanicPanel";
+import { useEmergency } from "@/context/EmergencyContext";
+import FakeCallPanel from "@/components/safety/FakeCallPanel";
+import LiveTrackingPanel from "@/components/safety/LiveTrackingPanel";
+import PanicPanel from "@/components/safety/PanicPanel";
 import { motion } from "framer-motion";
 import { Shield, Phone } from "lucide-react";
 
