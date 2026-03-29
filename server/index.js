@@ -13,6 +13,25 @@ app.use(cors({ origin: env.clientUrl }));
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Omina API server is running",
+    docs: {
+      health: "/api/health",
+      versionedHealth: "/api/v1/health",
+    },
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Omina API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use("/api", apiRoutes);
 app.use("/api/v1", apiRoutes);
 

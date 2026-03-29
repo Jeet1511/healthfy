@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import mongoose from "mongoose";
 import { AIProvider } from "../models/AIProvider.js";
+import { env } from "../config/env.js";
 import { decrypt, encrypt } from "../utils/crypto.js";
 
 const inMemoryProviders = [];
@@ -17,6 +18,10 @@ function maskKey(rawKey) {
 function inferProviderType({ name, model }) {
   const source = `${name || ""} ${model || ""}`.toLowerCase();
 
+  if (source.includes("openrouter") || source.includes("open-router")) {
+    return "openrouter";
+  }
+
   if (source.includes("anthropic") || source.includes("claude")) {
     return "anthropic";
   }
@@ -26,6 +31,54 @@ function inferProviderType({ name, model }) {
   }
 
   return "openai";
+}
+
+function getEnvProviderCredentials() {
+  if (env.openrouterApiKey) {
+    return {
+      id: "env-openrouter",
+      name: "env-openrouter",
+      model: env.openrouterModel,
+      temperature: env.aiTemperature,
+      providerType: "openrouter",
+      apiKey: env.openrouterApiKey,
+    };
+  }
+
+  if (env.openaiApiKey) {
+    return {
+      id: "env-openai",
+      name: "env-openai",
+      model: env.openaiModel,
+      temperature: env.aiTemperature,
+      providerType: "openai",
+      apiKey: env.openaiApiKey,
+    };
+  }
+
+  if (env.groqApiKey) {
+    return {
+      id: "env-groq",
+      name: "env-groq",
+      model: env.groqModel,
+      temperature: env.aiTemperature,
+      providerType: "groq",
+      apiKey: env.groqApiKey,
+    };
+  }
+
+  if (env.anthropicApiKey) {
+    return {
+      id: "env-anthropic",
+      name: "env-anthropic",
+      model: env.anthropicModel,
+      temperature: env.aiTemperature,
+      providerType: "anthropic",
+      apiKey: env.anthropicApiKey,
+    };
+  }
+
+  return null;
 }
 
 function mapProviderForResponse(provider) {
@@ -167,7 +220,7 @@ export async function getActiveProviderCredentials() {
   if (mongoose.connection.readyState === 1) {
     const provider = await AIProvider.findOne({ isActive: true, isEnabled: true }).select("+apiKeyEncrypted");
     if (!provider) {
-      return null;
+      return getEnvProviderCredentials();
     }
 
     return {
@@ -182,7 +235,7 @@ export async function getActiveProviderCredentials() {
 
   const provider = inMemoryProviders.find((item) => item.isActive && item.isEnabled);
   if (!provider) {
-    return null;
+    return getEnvProviderCredentials();
   }
 
   return {
@@ -234,4 +287,33 @@ export async function setProviderEnabled(providerId, isEnabled) {
   target.updatedAt = new Date().toISOString();
 
   return mapProviderForResponse(target);
+}
+
+export async function deleteProvider(providerId) {
+  if (mongoose.connection.readyState === 1) {
+    const provider = await AIProvider.findByIdAndDelete(providerId).select("+apiKeyEncrypted");
+    if (!provider) {
+      return null;
+    }
+
+    return mapProviderForResponse({
+      id: provider._id.toString(),
+      name: provider.name,
+      apiKeyEncrypted: provider.apiKeyEncrypted,
+      model: provider.model,
+      temperature: provider.temperature,
+      isActive: provider.isActive,
+      isEnabled: provider.isEnabled,
+      createdAt: provider.createdAt,
+      updatedAt: provider.updatedAt,
+    });
+  }
+
+  const index = inMemoryProviders.findIndex((item) => item.id === providerId);
+  if (index < 0) {
+    return null;
+  }
+
+  const [removed] = inMemoryProviders.splice(index, 1);
+  return mapProviderForResponse(removed);
 }

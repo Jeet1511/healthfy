@@ -1,4 +1,14 @@
-export async function groqService({ apiKey, model, temperature, prompt }) {
+export async function groqService({
+  apiKey,
+  model,
+  temperature,
+  prompt,
+  systemPrompt,
+  responseFormat = { type: "json_object" },
+}) {
+  const defaultSystemPrompt =
+    "You are a human assistance decision engine. Return strict JSON with keys: status, category, actions, instructions.";
+
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -11,12 +21,11 @@ export async function groqService({ apiKey, model, temperature, prompt }) {
       messages: [
         {
           role: "system",
-          content:
-            "You are a human assistance decision engine. Return strict JSON with keys: status, category, actions, instructions.",
+          content: systemPrompt || defaultSystemPrompt,
         },
         { role: "user", content: prompt },
       ],
-      response_format: { type: "json_object" },
+      ...(responseFormat ? { response_format: responseFormat } : {}),
     }),
   });
 

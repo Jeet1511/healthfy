@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { decisionEngineController } from "../controllers/aiDecisionController.js";
+import {
+	assistantChatController,
+	decisionEngineController,
+} from "../controllers/aiDecisionController.js";
 
 const router = Router();
 
 router.post("/decision-engine", decisionEngineController);
+router.post("/assistant-chat", assistantChatController);
 
 export default router;
