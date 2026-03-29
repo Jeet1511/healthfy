@@ -170,6 +170,27 @@ export default function HomePage() {
     if (!query.trim()) return;
     const intent = detectIntent(query);
     await track("search", { query, type: intent.mode }).catch(() => undefined);
+
+    try {
+      const ai = await apiClient.post("/ai/decision-engine", { input: query });
+      const aiData = ai.data || {};
+
+      const aiEmergency = ["CRITICAL", "MODERATE"].includes(String(aiData.status || "").toUpperCase());
+      if (aiEmergency) {
+        enterEmergencyMode();
+        setResult({
+          mode: "emergency",
+          urgency: String(aiData.status || "critical").toLowerCase(),
+          title: "Emergency mode activated",
+          summary: aiData.note ? `AI unavailable (${aiData.note}). Fallback guidance is shown.` : "AI guidance generated for immediate action.",
+          instructions: Array.isArray(aiData.instructions) && aiData.instructions.length ? aiData.instructions : EMERGENCY_GUIDANCE,
+        });
+        return;
+      }
+    } catch {
+      // Continue with existing behavior if AI call fails
+    }
+
     if (intent.mode === "emergency") {
       enterEmergencyMode();
       setResult({ mode: "emergency", urgency: intent.urgency, title: "Emergency mode activated", summary: "Immediate guidance is ready. Take action now.", instructions: EMERGENCY_GUIDANCE });

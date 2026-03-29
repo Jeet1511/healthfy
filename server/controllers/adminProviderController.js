@@ -1,6 +1,7 @@
 import {
   activateProvider,
   createProvider,
+  deleteProvider,
   listProviders,
   setProviderEnabled,
 } from "../services/aiProviderService.js";
@@ -76,6 +77,24 @@ export const toggleProviderEnabled = asyncHandler(async (req, res) => {
   }
 
   const provider = await setProviderEnabled(String(providerId), isEnabled);
+  if (!provider) {
+    throw new AppError("Provider not found", 404);
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: provider,
+  });
+});
+
+export const deleteAdminProvider = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new AppError("provider id is required", 400);
+  }
+
+  const provider = await deleteProvider(String(id));
   if (!provider) {
     throw new AppError("Provider not found", 404);
   }
