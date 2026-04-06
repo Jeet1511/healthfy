@@ -21,6 +21,8 @@ client/.env
 setup.sh
 setup.bat
 claude_desktop_config.json
+.vscode/
+server/key.pfx
 
 # testing
 /coverage
