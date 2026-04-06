@@ -1,0 +1,288 @@
+/**
+ * Permission Dialog Styles
+ */
+
+.permission-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.permission-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 500px;
+  width: 90vw;
+  max-height: 90vh;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 1.5rem;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.permission-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.dialog-description {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.main-description {
+  margin: 0;
+  font-size: 1rem;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.permission-details {
+  padding: 1rem;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.details-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.detail-check {
+  color: #16a34a;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.privacy-notice {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #dbeafe;
+  border-left: 4px solid #2563eb;
+  border-radius: 0.375rem;
+}
+
+.notice-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.action-btn.deny {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.action-btn.deny:hover {
+  background-color: #d1d5db;
+}
+
+.action-btn.grant {
+  background-color: #dc2626;
+  color: white;
+}
+
+.action-btn.grant:hover {
+  background-color: #b91c1c;
+  transform: scale(1.02);
+}
+
+.action-btn:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.fallback-info {
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.fallback-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .permission-dialog {
+    width: 95vw;
+    max-height: 95vh;
+  }
+
+  .dialog-content {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+  }
+
+  .dialog-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .permission-icon {
+    font-size: 2rem;
+  }
+
+  .dialog-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .permission-dialog {
+    background: #1f2937;
+  }
+
+  .dialog-title {
+    color: #f3f4f6;
+  }
+
+  .main-description,
+  .detail-item {
+    color: #d1d5db;
+  }
+
+  .permission-details {
+    background-color: #111827;
+  }
+
+  .details-title {
+    color: #e5e7eb;
+  }
+
+  .privacy-notice {
+    background-color: #1e40af;
+    border-left-color: #60a5fa;
+  }
+
+  .notice-text {
+    color: #bfdbfe;
+  }
+
+  .dialog-header {
+    border-bottom-color: #374151;
+  }
+
+  .dialog-actions {
+    border-top-color: #374151;
+  }
+
+  .action-btn.deny {
+    background-color: #374151;
+    color: #e5e7eb;
+  }
+
+  .action-btn.deny:hover {
+    background-color: #4b5563;
+  }
+
+  .fallback-info {
+    border-top-color: #374151;
+  }
+
+  .fallback-text {
+    color: #6b7280;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .permission-dialog,
+  .action-btn {
+    transition: none !important;
+  }
+}

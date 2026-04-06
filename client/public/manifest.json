@@ -1,0 +1,82 @@
+{
+  "name": "OMINA - Emergency Safety System",
+  "short_name": "OMINA",
+  "description": "Real-time evidence recording and emergency response system",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["emergency", "safety", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Start Emergency Recording",
+      "short_name": "SOS Recording",
+      "description": "Quickly start emergency evidence recording",
+      "url": "/?action=start-sos",
+      "icons": [
+        {
+          "src": "/icon-sos.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View Evidence",
+      "short_name": "Evidence Dashboard",
+      "description": "View recorded evidence sessions",
+      "url": "/?action=view-evidence",
+      "icons": [
+        {
+          "src": "/icon-evidence.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "media",
+          "accept": ["image/png", "image/jpeg", "video/mp4"]
+        }
+      ]
+    }
+  }
+}
