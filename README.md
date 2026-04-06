@@ -108,6 +108,62 @@ Standard decision schema:
 }
 ```
 
+## 🎨 Design System
+
+Integrated with UI/UX Design Library principles:
+- **Reference**: See `docs/DESIGN_SYSTEM.md` (local only)
+- Components follow accessibility (WCAG 2.1) standards
+- Mobile-first responsive design
+- Consistent color palette & typography
+- Learn from: https://github.com/justinhartman/ui-ux-design-library
+
+## 🤖 React MCP (Claude AI Integration)
+
+Integrated React Model Context Protocol for AI-assisted development:
+
+### Setup
+1. Follow: `docs/REACT_MCP_SETUP.md` (local only)
+2. Configure Claude Desktop with provided config
+3. Ask Claude to help build/design components
+
+### Features
+- Create React components with AI guidance
+- Follow design system automatically
+- Write tests and documentation
+- Refactor existing code
+
+### Example Usage in Claude:
+```
+Using react-mcp, create an emergency widget that:
+- Uses #DC2626 red for visibility
+- Is 48px+ for touch screens
+- Follows DESIGN_SYSTEM guidelines
+- Includes TypeScript types
+```
+
+**Get Started**: See `docs/DESIGN_AND_DEVELOPMENT.md` (local only)
+
+## 🚀 Network Sharing
+
+Share localhost on local network:
+```bash
+npm run dev
+```
+
+Then open: `https://192.168.29.62:5174/`
+
+**Note**: Self-signed SSL cert - click "Proceed" on first visit.
+
+## 📂 Documentation
+
+All markdown documentation is stored in the `/docs` folder and is **NOT uploaded to GitHub**. 
+This keeps the repository clean and documentation local-only.
+
+**Local docs** (see in `/docs` folder):
+- Design system & component guidelines
+- React MCP setup & configuration
+- Development workflow
+
 ## Notes
 
 - Next.js API routes and SSR are no longer used for runtime.

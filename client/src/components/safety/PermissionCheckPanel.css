@@ -1,0 +1,115 @@
+/**
+ * PermissionCheckPanel.css
+ * Permission checking UI styling
+ */
+
+.permission-check-panel {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff0f6 100%);
+  border: 1px solid #fde68a;
+}
+
+.permissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+  transition: all 0.2s;
+}
+
+.permission-item.granted {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.permission-item.denied {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.permission-item.prompt {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.permission-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.permission-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.permission-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.2rem;
+}
+
+.permission-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.permission-request-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.permission-request-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.permission-request-btn:active {
+  transform: translateY(0);
+}
+
+.permission-note {
+  padding: 1rem;
+  background: #fff5f5;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .permission-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .permission-request-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

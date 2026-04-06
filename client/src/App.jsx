@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AppShell from "./components/AppShell";
+import { useEmergencySystemInit } from "@/hooks/useEmergencySystemInit";
+import { useServiceWorker, requestPushNotificationPermission } from "@/hooks/useServiceWorker";
 import {
   HomePage,
   MapPage,
@@ -56,8 +59,25 @@ function PageWrapper({ children }) {
 }
 
 export default function App() {
+  // Initialize emergency system on app startup
+  useEmergencySystemInit();
+
+  // Initialize service worker for offline support, caching, and push notifications
+  const { isOnline, isUpdateAvailable, updateServiceWorker } = useServiceWorker();
+
+  // Request push notification permission for emergency alerts
+  useEffect(() => {
+    requestPushNotificationPermission();
+  }, []);
+
   return (
     <AppShell>
+      {isUpdateAvailable && (
+        <div className="update-banner">
+          <span>New version available</span>
+          <button onClick={updateServiceWorker}>Update</button>
+        </div>
+      )}
       <AnimatedRoutes />
     </AppShell>
   );

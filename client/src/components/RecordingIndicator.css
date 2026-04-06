@@ -1,0 +1,186 @@
+/**
+ * Recording Indicator Styles
+ */
+
+.recording-indicator {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  margin-bottom: 1rem;
+}
+
+.indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.recording-dot {
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.indicator-text {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.recording-time {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.session-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  max-width: 200px;
+}
+
+.badge-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.session-id {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.safety-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.safety-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.safety-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.indicator-bar {
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
+  border-radius: 2px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.bar-pulse {
+  height: 100%;
+  background-color: white;
+  width: 30%;
+  border-radius: 2px;
+}
+
+/* Compact Mode (when scrolled) */
+.recording-indicator.compact {
+  padding: 0.75rem;
+}
+
+.recording-indicator.compact .indicator-text {
+  gap: 0.5rem;
+}
+
+.recording-indicator.compact .status-label {
+  font-size: 0.85rem;
+}
+
+.recording-indicator.compact .recording-time {
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .recording-indicator {
+    padding: 0.75rem;
+  }
+
+  .indicator-content {
+    gap: 0.75rem;
+  }
+
+  .safety-info {
+    width: 100%;
+    font-size: 0.75rem;
+  }
+
+  .session-badge {
+    max-width: 150px;
+  }
+
+  .session-id {
+    font-size: 0.7rem;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .recording-indicator {
+    background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .recording-dot,
+  .bar-pulse {
+    animation: none !important;
+  }
+}
+
+/* Print */
+@media print {
+  .recording-indicator {
+    display: block;
+    background: white;
+    color: black;
+    border: 1px solid black;
+  }
+
+  .recording-dot {
+    background-color: black;
+  }
+
+  .indicator-bar {
+    display: none;
+  }
+}

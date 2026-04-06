@@ -1,0 +1,38 @@
+{
+  // VS Code Copilot Settings for OMINA Development
+  
+  // Enable Copilot
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true
+  },
+
+  // Code completion settings
+  "editor.inlineSuggestReferencesEnabled": true,
+  "github.copilot.advanced": {
+    "listTopK": null,
+    "temperature": null
+  },
+
+  // Copilot Chat settings (if using GitHub Copilot Chat extension)
+  "github.copilot.chat.acceptanceThreshold": 0.2,
+  "github.copilot.chat.useEditorLanguageDetection": true,
+
+  // File associations for instruction files
+  "files.associations": {
+    ".instructions.md": "markdown",
+    ".skill.md": "markdown",
+    ".agent.md": "markdown",
+    ".prompt.md": "markdown"
+  },
+
+  // Recommended extensions
+  "extensions.recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-playwright.test-explorer"
+  ]
+}

@@ -1,0 +1,388 @@
+/* Danger Zone Panel Styles */
+.danger-zone-panel {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12px;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 1.5rem 0;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #fed7aa;
+}
+
+.panel-header .title {
+  font-size: 1.2rem;
+  color: #92400e;
+  margin: 0;
+}
+
+.risk-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+}
+
+.risk-badge.risk-safe {
+  background: #22c55e;
+}
+
+.risk-badge.risk-caution {
+  background: #eab308;
+  color: #333;
+}
+
+.risk-badge.risk-warning {
+  background: #f97316;
+}
+
+.risk-badge.risk-danger {
+  background: #dc2626;
+}
+
+/* Danger Alert */
+.danger-alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid;
+}
+
+.alert-danger {
+  background: #fee2e2;
+  border-left-color: #dc2626;
+  color: #7f1d1d;
+}
+
+.alert-danger svg {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.danger-alert p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.danger-alert small {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Risk Meter */
+.risk-meter {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+.meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.meter-bar {
+  position: relative;
+  height: 24px;
+  background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #dc2626 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.meter-fill {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.15);
+  transition: width 0.3s ease;
+}
+
+.meter-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 28px;
+  background: white;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: left 0.3s ease;
+}
+
+.meter-value {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* Recommendations */
+.recommendations {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+}
+
+.recommendations h4 {
+  color: #1e40af;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.rec-item {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.rec-item.rec-danger {
+  background: #fee2e2;
+  border-left: 3px solid #dc2626;
+  color: #7f1d1d;
+}
+
+.rec-item.rec-warning {
+  background: #fef08a;
+  border-left: 3px solid #eab308;
+  color: #78350f;
+}
+
+.rec-item.rec-caution {
+  background: #dbeafe;
+  border-left: 3px solid #3b82f6;
+  color: #1e40af;
+}
+
+.rec-item.rec-info {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+  color: #166534;
+}
+
+.rec-header {
+  margin-bottom: 0.5rem;
+}
+
+.rec-header strong {
+  font-size: 0.95rem;
+}
+
+.rec-details {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.rec-action {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding-left: 0.5rem;
+}
+
+/* Nearby Zones */
+.nearby-zones {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+
+.nearby-zones h4 {
+  color: #92400e;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.zones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.zone-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #fbbf24;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.zone-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.zone-item.zone-danger {
+  border-left: 3px solid #dc2626;
+}
+
+.zone-item.zone-warning {
+  border-left: 3px solid #f97316;
+}
+
+.zone-item.zone-caution {
+  border-left: 3px solid #eab308;
+}
+
+.zone-item.zone-safe {
+  border-left: 3px solid #22c55e;
+}
+
+.zone-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.zone-info {
+  flex: 1;
+}
+
+.zone-info strong {
+  display: block;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.zone-info small {
+  display: block;
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.distance {
+  color: #92400e;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Actions */
+.zone-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.btn-report {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f97316;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-report:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* Report Form */
+.report-form {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #fed7aa;
+}
+
+.report-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.report-form textarea:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.75rem;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-submit:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* Info Box */
+.zone-info-box {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(92, 64, 8, 0.05);
+  border-left: 3px solid #b45309;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #92400e;
+}
+
+.zone-info-box p {
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .danger-zone-panel {
+    padding: 1rem;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .danger-alert {
+    flex-direction: column;
+  }
+
+  .zone-item {
+    gap: 0.75rem;
+  }
+}
