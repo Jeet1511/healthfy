@@ -1,0 +1,140 @@
+/**
+ * SystemLogPanel.css
+ * Emergency system log display styling
+ */
+
+.system-log-panel {
+  background: #f9f9f9;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.logs-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.logs-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.logs-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.logs-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.logs-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.no-logs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid #ccc;
+  background: white;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  transition: all 0.2s;
+}
+
+.log-entry:hover {
+  background: #f5f5f5;
+}
+
+.log-time {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #999;
+  min-width: 60px;
+}
+
+.log-icon {
+  font-size: 1rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.log-message {
+  flex: 1;
+  color: #333;
+  word-break: break-word;
+}
+
+/* Log type colors */
+.log-info {
+  border-left-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.log-success {
+  border-left-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.log-warning {
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.log-error,
+.log-sos_trigger {
+  border-left-color: #dc2626;
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.log-error .log-message,
+.log-sos_trigger .log-message {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.log-recording_started {
+  border-left-color: #9333ea;
+  background: rgba(147, 51, 234, 0.05);
+}
+
+.log-location_shared {
+  border-left-color: #06b6d4;
+  background: rgba(6, 182, 212, 0.05);
+}
+
+@media (max-width: 640px) {
+  .system-log-panel {
+    max-height: 300px;
+  }
+
+  .log-entry {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .log-time {
+    min-width: 50px;
+  }
+
+  .log-icon {
+    min-width: 20px;
+  }
+}
