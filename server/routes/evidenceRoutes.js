@@ -2,6 +2,14 @@ import { Router } from "express";
 import multer from "multer";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
+  appendLocationLog,
+  downloadSessionMedia,
+  downloadSharedSessionMedia,
+  generateTrustedAccessLink,
+  getEmergencySessionDetail,
+  getEmergencySessions,
+  getSharedEvidenceSession,
+  logSessionEvent,
   startEvidenceSession,
   uploadEvidenceChunk,
   retryChunkUpload,
@@ -11,6 +19,8 @@ import {
   getChunkDownloadLink,
   deleteEvidenceSession,
   shareEvidenceSession,
+  upsertIncidentNote,
+  uploadVoiceIncidentProof,
 } from "../controllers/evidenceController.js";
 
 const router = Router();
@@ -24,8 +34,31 @@ const upload = multer({
   },
 });
 
-// All routes require authentication
+// Public trusted-contact read-only routes
+router.get("/shared/:token", getSharedEvidenceSession);
+router.get("/shared/:token/media/:mediaId/download", downloadSharedSessionMedia);
+
+// All routes below require authentication
 router.use(authMiddleware);
+
+/**
+ * Mode-aware emergency evidence dashboard routes
+ */
+router.get("/sessions", getEmergencySessions);
+router.get("/sessions/:sessionId", getEmergencySessionDetail);
+router.post("/sessions/:sessionId/events", logSessionEvent);
+router.post("/location-log", appendLocationLog);
+router.post("/sessions/:sessionId/incident-note", upsertIncidentNote);
+router.post(
+  "/sessions/:sessionId/voi",
+  upload.fields([
+    { name: "voiceProof", maxCount: 1 },
+    { name: "attachments", maxCount: 5 },
+  ]),
+  uploadVoiceIncidentProof
+);
+router.post("/sessions/:sessionId/share-link", generateTrustedAccessLink);
+router.get("/sessions/:sessionId/media/:mediaId/download", downloadSessionMedia);
 
 /**
  * Evidence Session Management

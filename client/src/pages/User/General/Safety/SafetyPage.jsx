@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useEmergency } from "@/context/EmergencyContext";
-import FloatingSOSButton from "@/components/emergency/FloatingSOSButton";
 import SOSActivationModal from "@/components/emergency/SOSActivationModal";
 import FakeCallPanel from "@/components/safety/FakeCallPanel";
 import LiveTrackingPanel from "@/components/safety/LiveTrackingPanel";
@@ -8,37 +7,89 @@ import StatusIndicatorsPanel from "@/components/safety/StatusIndicatorsPanel";
 import SystemLogPanel from "@/components/safety/SystemLogPanel";
 import PermissionCheckPanel from "@/components/safety/PermissionCheckPanel";
 import InfoSection from "@/components/safety/InfoSection";
+import EvidenceDashboard from "@/components/EvidenceDashboard";
 import ToastContainer from "@/components/ToastContainer";
 import { useToast } from "@/hooks/useToast";
 import { motion } from "framer-motion";
-import { Shield, Phone, AlertTriangle } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Phone, AlertTriangle, ShieldAlert } from "lucide-react";
+import {
+  PERMISSION_STATUS,
+  PERMISSION_TYPES,
+} from "@/services/permissionOrchestrator";
 import "./SafetyPage.css";
 
 export default function SafetyPage() {
-  const { emergencyActive, setCurrentContext, appMode, sosStatus, addStatusLog } = useEmergency();
+  const routerLocation = useLocation();
+  const { setCurrentContext, appMode, sosStatus, networkStatus, emergencySession, permissions } = useEmergency();
   const { toasts, showToast, removeToast } = useToast();
   const [showSOSModal, setShowSOSModal] = useState(false);
+  const [blockedCriticalPermissions, setBlockedCriticalPermissions] = useState([]);
+  const [allowDegradedPermissions, setAllowDegradedPermissions] = useState(false);
+
+  const sharedEvidenceToken = new URLSearchParams(routerLocation.search).get("sharedEvidenceToken");
+  const isSharedEvidenceView = Boolean(sharedEvidenceToken);
 
   const isEmergency = appMode === "emergency";
+  const criticalTypes = [PERMISSION_TYPES.LOCATION, PERMISSION_TYPES.MICROPHONE];
+
+  const emergencyGateRequired =
+    isEmergency &&
+    !allowDegradedPermissions &&
+    criticalTypes.some((type) => {
+      const status = permissions[type];
+      return [PERMISSION_STATUS.PROMPT, PERMISSION_STATUS.DENIED, PERMISSION_STATUS.UNAVAILABLE].includes(
+        status
+      );
+    });
 
   useEffect(() => {
     setCurrentContext("safety");
   }, [setCurrentContext]);
 
+  useEffect(() => {
+    if (!isEmergency) {
+      setAllowDegradedPermissions(false);
+      setBlockedCriticalPermissions([]);
+    }
+  }, [isEmergency]);
+
   // Monitor SOS status and show notifications
   useEffect(() => {
-    if (sosStatus === "triggered") {
+    if (isSharedEvidenceView) {
+      setShowSOSModal(false);
+      return;
+    }
+    if (sosStatus === "triggered" || sosStatus === "recording") {
       showToast("🚨 SOS Activated - Emergency services notified!", "error", 5000);
       setShowSOSModal(true);
     }
-  }, [sosStatus, showToast]);
+  }, [isSharedEvidenceView, sosStatus, showToast]);
 
   // Close modal when emergency ends
   useEffect(() => {
+    if (isSharedEvidenceView) {
+      setShowSOSModal(false);
+      return;
+    }
     if (!isEmergency) {
       setShowSOSModal(false);
     }
-  }, [isEmergency]);
+  }, [isEmergency, isSharedEvidenceView]);
+
+  if (isSharedEvidenceView) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        className="safety-page-wrapper"
+        data-mode="shared-evidence"
+      >
+        <EvidenceDashboard sharedToken={sharedEvidenceToken} />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -46,15 +97,66 @@ export default function SafetyPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
       className="safety-page-wrapper"
+      data-mode={appMode}
     >
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
-      {/* Floating SOS Button */}
-      <FloatingSOSButton />
-
       {/* SOS Activation Modal */}
       <SOSActivationModal isOpen={showSOSModal} onClose={() => setShowSOSModal(false)} />
+
+      {emergencyGateRequired && (
+        <div className="emergency-permission-overlay" role="dialog" aria-modal="true">
+          <div className="emergency-permission-card">
+            <h3>
+              <ShieldAlert size={18} />
+              Emergency Permission Recovery Required
+            </h3>
+            <p>
+              Critical permissions are blocked. Enable location and microphone for full emergency reliability.
+            </p>
+
+            <PermissionCheckPanel
+              modeOverride="emergency"
+              onCriticalStateChange={setBlockedCriticalPermissions}
+            />
+
+            {blockedCriticalPermissions.length > 0 && (
+              <p className="emergency-gate-warning">
+                Continuing without full access will run in degraded mode with reduced evidence quality.
+              </p>
+            )}
+
+            <div className="emergency-gate-actions">
+              <button
+                type="button"
+                className="btn-warning"
+                onClick={() => setAllowDegradedPermissions(true)}
+              >
+                Continue In Degraded Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEmergency && (
+        <motion.section
+          className="card emergency-live-banner"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="emergency-live-headline">Emergency Active</div>
+          <p>
+            High-priority mode is running with continuous tracking and recording fallback.
+          </p>
+          <p>
+            Network: {networkStatus.isOnline ? "Online" : "Offline"}
+            {` • Queued Alerts: ${emergencySession.queuedAlerts || 0}`}
+            {` • Queued Location Logs: ${emergencySession.queuedLocationLogs || 0}`}
+          </p>
+        </motion.section>
+      )}
 
       {/* Permission Check (if not in emergency) */}
       {!isEmergency && (
@@ -149,17 +251,25 @@ export default function SafetyPage() {
                   <AlertTriangle size={20} />
                   Emergency Active
                 </h3>
-                <p className="subtle">Your location and information are being sent to emergency contacts.</p>
+                <p className="subtle">Your location, recordings, and alert queue are actively managed in fail-safe mode.</p>
                 <div style={{ marginTop: "1rem", fontSize: "0.9rem", lineHeight: "1.6" }}>
-                  <p>✓ Audio recording active</p>
-                  <p>✓ Location tracking active</p>
-                  <p>✓ Contacts notified</p>
+                  <p>✓ Emergency tracking active</p>
+                  <p>✓ Media recording with fallback</p>
+                  <p>✓ Alerts queued/retried if delivery fails</p>
                 </div>
               </section>
             </motion.div>
           )}
         </div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: isEmergency ? 0.95 : 0.65 }}
+      >
+        <EvidenceDashboard />
+      </motion.div>
     </motion.div>
   );
 }

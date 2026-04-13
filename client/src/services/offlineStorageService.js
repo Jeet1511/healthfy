@@ -132,12 +132,13 @@ class OfflineStorageService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(
-        [STORES.UPLOADED_CHUNKS, STORES.PENDING_CHUNKS],
+        [STORES.UPLOADED_CHUNKS, STORES.PENDING_CHUNKS, STORES.FAILED_CHUNKS],
         "readwrite"
       );
 
       const uploadedStore = transaction.objectStore(STORES.UPLOADED_CHUNKS);
       const pendingStore = transaction.objectStore(STORES.PENDING_CHUNKS);
+      const failedStore = transaction.objectStore(STORES.FAILED_CHUNKS);
 
       const uploadedData = {
         sessionId: chunk.sessionId,
@@ -151,6 +152,7 @@ class OfflineStorageService {
       // Remove from pending
       const key = [chunk.sessionId, chunk.chunkIndex];
       pendingStore.delete(key);
+      failedStore.delete(key);
 
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => resolve(uploadedData);
@@ -166,9 +168,14 @@ class OfflineStorageService {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction([STORES.UPLOADED_CHUNKS], "readonly");
       const store = transaction.objectStore(STORES.UPLOADED_CHUNKS);
-      const index = store.index("sessionId");
+      let request;
 
-      const request = index.getAll(sessionId);
+      if (sessionId) {
+        const index = store.index("sessionId");
+        request = index.getAll(sessionId);
+      } else {
+        request = store.getAll();
+      }
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
@@ -307,23 +314,19 @@ class OfflineStorageService {
         "readwrite"
       );
 
-      const stores = [
-        transaction.objectStore(STORES.PENDING_CHUNKS),
-        transaction.objectStore(STORES.UPLOADED_CHUNKS),
-        transaction.objectStore(STORES.FAILED_CHUNKS),
-        transaction.objectStore(STORES.SESSIONS),
-      ];
-
-      stores.forEach((store) => {
-        if (store.indexNames.contains("sessionId")) {
-          const index = store.index("sessionId");
-          index.getAll(sessionId).onsuccess = (event) => {
-            event.target.result.forEach((item) => {
-              store.delete(item[store.keyPath]);
-            });
-          };
-        }
+      [STORES.PENDING_CHUNKS, STORES.UPLOADED_CHUNKS, STORES.FAILED_CHUNKS].forEach((storeName) => {
+        const store = transaction.objectStore(storeName);
+        const index = store.index("sessionId");
+        const request = index.openCursor(IDBKeyRange.only(sessionId));
+        request.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (!cursor) return;
+          cursor.delete();
+          cursor.continue();
+        };
       });
+
+      transaction.objectStore(STORES.SESSIONS).delete(sessionId);
 
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => resolve(true);

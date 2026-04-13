@@ -81,7 +81,7 @@ export function watchLocation(callback, onError, accuracy = "NORMAL") {
  * Stop watching location
  */
 export function stopWatchingLocation(watchId) {
-  if (watchId !== null && Navigator.geolocation) {
+  if (watchId !== null && navigator.geolocation) {
     navigator.geolocation.clearWatch(watchId);
   }
 }

@@ -40,6 +40,31 @@ class PermissionOrchestrator {
     this.requestCooldown = 3000; // 3 seconds between requests
     this.statusHandlers = [];
     this.denialHandlers = [];
+    this.requestTimeoutMs = 5000;
+    this.settingsLinks = {
+      chrome: "chrome://settings/content",
+      edge: "edge://settings/content",
+      firefox: "about:preferences#privacy",
+      safari: "x-apple.systempreferences:com.apple.preference.security?Privacy",
+    };
+  }
+
+  _withTimeout(promise, timeoutMs = this.requestTimeoutMs) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Permission request timed out")), timeoutMs);
+      }),
+    ]);
+  }
+
+  _getBrowserFamily() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes("edg")) return "edge";
+    if (ua.includes("chrome")) return "chrome";
+    if (ua.includes("firefox")) return "firefox";
+    if (ua.includes("safari")) return "safari";
+    return "other";
   }
 
   /**
@@ -61,6 +86,59 @@ class PermissionOrchestrator {
       console.error("Permission initialization failed:", error);
       throw error;
     }
+  }
+
+  /**
+   * Public API: check one permission (or all if omitted).
+   */
+  async checkPermission(type = null) {
+    this._checkSupport();
+    await this._checkPermissionStates();
+    if (!type) {
+      return this.getPermissionStatus();
+    }
+    return this.getPermissionStatus(type);
+  }
+
+  /**
+   * Public API: refresh all states.
+   */
+  async refreshPermissions() {
+    await this.checkPermission();
+    return this.getPermissionStatus();
+  }
+
+  /**
+   * Public API: request by generic type.
+   */
+  async requestPermission(type, showPrompt = true) {
+    if (type === PERMISSION_TYPES.CAMERA) return this.requestCamera(showPrompt);
+    if (type === PERMISSION_TYPES.MICROPHONE) return this.requestMicrophone(showPrompt);
+    if (type === PERMISSION_TYPES.LOCATION) return this.requestLocation(showPrompt);
+    if (type === PERMISSION_TYPES.NOTIFICATIONS) return this.requestNotifications(showPrompt);
+    throw new Error(`Unknown permission type: ${type}`);
+  }
+
+  /**
+   * Public API: manual recovery details for hard-denied permission.
+   */
+  handleDenied(type) {
+    const browserFamily = this._getBrowserFamily();
+    const browserSettingsLink = this.settingsLinks[browserFamily] || null;
+
+    return {
+      type,
+      status: PERMISSION_STATUS.DENIED,
+      message: "Permission blocked by browser settings",
+      browserSettingsLink,
+      steps: [
+        "Click the lock icon in the address bar",
+        "Open site settings or permissions",
+        `Set ${type} to Allow`,
+        "Reload the page and refresh permissions",
+      ],
+      fallbackOptions: this.getFallbackOptions(type),
+    };
   }
 
   /**
@@ -157,6 +235,18 @@ class PermissionOrchestrator {
           console.warn(`Could not query ${query.name} permission:`, err);
         }
       }
+
+      if ("Notification" in window) {
+        const notificationState = Notification.permission;
+        const mappedNotificationState =
+          notificationState === "granted"
+            ? PERMISSION_STATUS.GRANTED
+            : notificationState === "denied"
+              ? PERMISSION_STATUS.DENIED
+              : PERMISSION_STATUS.PROMPT;
+
+        this.permissions.set(PERMISSION_TYPES.NOTIFICATIONS, mappedNotificationState);
+      }
     } catch (error) {
       console.error("Permission state check failed:", error);
     }
@@ -185,9 +275,11 @@ class PermissionOrchestrator {
       PERMISSION_TYPES.CAMERA,
       async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          });
+          const stream = await this._withTimeout(
+            navigator.mediaDevices.getUserMedia({
+              video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+            })
+          );
           stream.getTracks().forEach((track) => track.stop());
           return PERMISSION_STATUS.GRANTED;
         } catch (error) {
@@ -209,13 +301,15 @@ class PermissionOrchestrator {
       PERMISSION_TYPES.MICROPHONE,
       async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            },
-          });
+          const stream = await this._withTimeout(
+            navigator.mediaDevices.getUserMedia({
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+              },
+            })
+          );
           stream.getTracks().forEach((track) => track.stop());
           return PERMISSION_STATUS.GRANTED;
         } catch (error) {
@@ -297,6 +391,12 @@ class PermissionOrchestrator {
         return PERMISSION_STATUS.UNAVAILABLE;
       }
 
+      // Respect hard-denied browser restriction; guide user to recovery flow.
+      if (this.permissions.get(type) === PERMISSION_STATUS.DENIED) {
+        this._notifyDenial(type);
+        return PERMISSION_STATUS.DENIED;
+      }
+
       // Check already granted
       if (this.permissions.get(type) === PERMISSION_STATUS.GRANTED) {
         return PERMISSION_STATUS.GRANTED;
@@ -336,10 +436,10 @@ class PermissionOrchestrator {
    */
   async requestAllPermissions() {
     const results = {
-      [PERMISSION_TYPES.CAMERA]: await this.requestCamera(),
-      [PERMISSION_TYPES.MICROPHONE]: await this.requestMicrophone(),
-      [PERMISSION_TYPES.LOCATION]: await this.requestLocation(),
-      [PERMISSION_TYPES.NOTIFICATIONS]: await this.requestNotifications(),
+      [PERMISSION_TYPES.CAMERA]: await this.requestPermission(PERMISSION_TYPES.CAMERA),
+      [PERMISSION_TYPES.MICROPHONE]: await this.requestPermission(PERMISSION_TYPES.MICROPHONE),
+      [PERMISSION_TYPES.LOCATION]: await this.requestPermission(PERMISSION_TYPES.LOCATION),
+      [PERMISSION_TYPES.NOTIFICATIONS]: await this.requestPermission(PERMISSION_TYPES.NOTIFICATIONS),
     };
     return results;
   }
@@ -425,6 +525,14 @@ class PermissionOrchestrator {
    */
   onStatusChange(handler) {
     this.statusHandlers.push(handler);
+
+    return () => {
+      this.offStatusChange(handler);
+    };
+  }
+
+  offStatusChange(handler) {
+    this.statusHandlers = this.statusHandlers.filter((entry) => entry !== handler);
   }
 
   /**
@@ -432,6 +540,14 @@ class PermissionOrchestrator {
    */
   onDenial(handler) {
     this.denialHandlers.push(handler);
+
+    return () => {
+      this.offDenial(handler);
+    };
+  }
+
+  offDenial(handler) {
+    this.denialHandlers = this.denialHandlers.filter((entry) => entry !== handler);
   }
 
   /**

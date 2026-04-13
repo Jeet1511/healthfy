@@ -1,6 +1,21 @@
-import { createContext, useContext, useMemo, useState, useCallback } from "react";
+import { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
 
 const EmergencyContext = createContext(null);
+
+const defaultPermissions = {
+  location: "prompt",
+  microphone: "prompt",
+  camera: "prompt",
+  notifications: "prompt",
+};
+
+const defaultSOSMetadata = {
+  hasAudio: false,
+  hasVideo: false,
+  contactsNotified: [],
+  location: null,
+  triggerSource: null,
+};
 
 // Default emergency profile structure
 const defaultEmergencyProfile = {
@@ -26,6 +41,12 @@ export function EmergencyProvider({ children }) {
   const [currentContext, setCurrentContext] = useState("daily");
   const [appMode, setAppMode] = useState("daily");
   const [emergencyActive, setEmergencyActive] = useState(false);
+
+  // Connectivity state
+  const [networkStatus, setNetworkStatus] = useState({
+    isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+    lastChangedAt: new Date().toISOString(),
+  });
   
   // Real-time location tracking
   const [location, setLocation] = useState(null);
@@ -34,11 +55,21 @@ export function EmergencyProvider({ children }) {
   // SOS system
   const [sosStatus, setSosStatus] = useState(SOS_STATUS.INACTIVE);
   const [sosTriggeredAt, setSosTriggeredAt] = useState(null);
-  const [sosMetadata, setSosMetadata] = useState({
-    hasAudio: false,
-    hasVideo: false,
-    contactsNotified: [],
-    location: null,
+  const [sosMetadata, setSosMetadata] = useState(defaultSOSMetadata);
+
+  // Emergency session state for tracking uploads/alerts
+  const [emergencySession, setEmergencySession] = useState({
+    id: null,
+    startedAt: null,
+    triggerSource: null,
+    queuedLocationLogs: 0,
+    queuedAlerts: 0,
+    queuedChunkUploads: 0,
+    uploadedChunkCount: 0,
+    evidenceSessionId: null,
+    evidenceState: null,
+    backgroundRecording: false,
+    recordingChunkDurationMs: null,
   });
   
   // Recording state
@@ -53,15 +84,10 @@ export function EmergencyProvider({ children }) {
   const [statusLogs, setStatusLogs] = useState([]);
   
   // Permissions state
-  const [permissions, setPermissions] = useState({
-    location: null,
-    microphone: null,
-    camera: null,
-    notifications: null,
-  });
+  const [permissions, setPermissions] = useState(defaultPermissions);
   
   // Voice command active
-  const [voiceCommandActive, setVoiceCommandActive] = useState(false);
+  const [voiceCommandActive, setVoiceCommandActive] = useState(true);
 
   const addStatusLog = useCallback((message, type = "info", data = null) => {
     const log = {
@@ -74,12 +100,49 @@ export function EmergencyProvider({ children }) {
     setStatusLogs((prev) => [log, ...prev].slice(0, 50)); // Keep last 50 logs
   }, []);
 
-  const enterEmergencyMode = useCallback(() => {
+  useEffect(() => {
+    const syncNetworkState = () => {
+      setNetworkStatus({
+        isOnline: navigator.onLine,
+        lastChangedAt: new Date().toISOString(),
+      });
+      addStatusLog(
+        navigator.onLine
+          ? "Network restored. Pending emergency data will sync."
+          : "Network offline. Emergency data will be queued for sync.",
+        navigator.onLine ? "success" : "warning"
+      );
+    };
+
+    window.addEventListener("online", syncNetworkState);
+    window.addEventListener("offline", syncNetworkState);
+
+    return () => {
+      window.removeEventListener("online", syncNetworkState);
+      window.removeEventListener("offline", syncNetworkState);
+    };
+  }, [addStatusLog]);
+
+  const updateEmergencySession = useCallback((updates) => {
+    setEmergencySession((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  const enterEmergencyMode = useCallback((triggerSource = "manual") => {
     setEmergencyActive(true);
     setAppMode("emergency");
     setCurrentContext("emergency");
-    setSosStatus(SOS_STATUS.ARMED);
-    addStatusLog("Emergency mode activated", "warning");
+    setSosStatus((prev) =>
+      prev === SOS_STATUS.INACTIVE || prev === SOS_STATUS.COOLDOWN
+        ? SOS_STATUS.ARMED
+        : prev
+    );
+    setEmergencySession((prev) => ({
+      ...prev,
+      id: prev.id || `emg_${Date.now()}`,
+      startedAt: prev.startedAt || new Date().toISOString(),
+      triggerSource,
+    }));
+    addStatusLog(`Emergency mode activated (${triggerSource})`, "warning");
   }, [addStatusLog]);
 
   const enterDailyMode = useCallback(() => {
@@ -87,14 +150,47 @@ export function EmergencyProvider({ children }) {
     setAppMode("daily");
     setCurrentContext("daily");
     setSosStatus(SOS_STATUS.INACTIVE);
+    setSosTriggeredAt(null);
     setIsRecordingAudio(false);
     setIsRecordingVideo(false);
+    setSosMetadata(defaultSOSMetadata);
+    setEmergencySession({
+      id: null,
+      startedAt: null,
+      triggerSource: null,
+      queuedLocationLogs: 0,
+      queuedAlerts: 0,
+      queuedChunkUploads: 0,
+      uploadedChunkCount: 0,
+      evidenceSessionId: null,
+      evidenceState: null,
+      backgroundRecording: false,
+      recordingChunkDurationMs: null,
+    });
     addStatusLog("Returned to daily mode", "info");
   }, [addStatusLog]);
 
-  const triggerSOS = useCallback(() => {
+  const triggerSOS = useCallback((metadata = {}) => {
+    setEmergencyActive(true);
+    setAppMode("emergency");
+    setCurrentContext("emergency");
     setSosStatus(SOS_STATUS.TRIGGERED);
-    setSosTriggeredAt(new Date());
+    const triggeredAt = new Date();
+    setSosTriggeredAt(triggeredAt);
+    setEmergencySession((prev) => ({
+      ...prev,
+      id: prev.id || `emg_${Date.now()}`,
+      startedAt: prev.startedAt || triggeredAt.toISOString(),
+      triggerSource: metadata.triggerSource || prev.triggerSource || "manual",
+    }));
+    setSosMetadata((prev) => ({
+      ...prev,
+      ...metadata,
+      contactsNotified: Array.isArray(metadata.contactsNotified)
+        ? metadata.contactsNotified
+        : prev.contactsNotified,
+      triggerSource: metadata.triggerSource || prev.triggerSource || "manual",
+    }));
     addStatusLog("🚨 SOS TRIGGERED", "error");
   }, [addStatusLog]);
 
@@ -104,8 +200,23 @@ export function EmergencyProvider({ children }) {
   }, [addStatusLog]);
 
   const updatePermission = useCallback((permission, status) => {
-    setPermissions((prev) => ({ ...prev, [permission]: status }));
+    setPermissions((prev) => ({
+      ...prev,
+      [permission]: status || defaultPermissions[permission] || "prompt",
+    }));
   }, []);
+
+  const updateAllPermissions = useCallback((nextPermissions = {}) => {
+    setPermissions((prev) => ({
+      ...prev,
+      ...nextPermissions,
+    }));
+  }, []);
+
+  const cancelSOS = useCallback(() => {
+    addStatusLog("SOS canceled by user", "warning");
+    enterDailyMode();
+  }, [addStatusLog, enterDailyMode]);
 
   const value = useMemo(
     () => ({
@@ -116,6 +227,8 @@ export function EmergencyProvider({ children }) {
       setAppMode,
       emergencyActive,
       setEmergencyActive,
+      networkStatus,
+      setNetworkStatus,
       
       // Location tracking
       location,
@@ -129,7 +242,10 @@ export function EmergencyProvider({ children }) {
       sosTriggeredAt,
       sosMetadata,
       setSosMetadata,
+      emergencySession,
+      updateEmergencySession,
       triggerSOS,
+      cancelSOS,
       
       // Recording state
       isRecordingAudio,
@@ -150,6 +266,7 @@ export function EmergencyProvider({ children }) {
       // Permissions
       permissions,
       updatePermission,
+      updateAllPermissions,
       
       // Voice commands
       voiceCommandActive,
@@ -158,16 +275,19 @@ export function EmergencyProvider({ children }) {
       // Mode switching
       enterEmergencyMode,
       enterDailyMode,
+      SOS_STATUS,
     }),
     [
       currentContext,
       appMode,
       emergencyActive,
+      networkStatus,
       location,
       locationWatchId,
       sosStatus,
       sosTriggeredAt,
       sosMetadata,
+      emergencySession,
       isRecordingAudio,
       isRecordingVideo,
       recordingStartTime,
@@ -178,8 +298,11 @@ export function EmergencyProvider({ children }) {
       enterEmergencyMode,
       enterDailyMode,
       triggerSOS,
+      cancelSOS,
       updateProfile,
       updatePermission,
+      updateAllPermissions,
+      updateEmergencySession,
       addStatusLog,
     ]
   );

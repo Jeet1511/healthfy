@@ -14,6 +14,7 @@ export const RECORDING_STATUS = {
 
 export const RECORDING_TYPE = {
   AUDIO_ONLY: "audio-only",
+  VIDEO_ONLY: "video-only",
   AUDIO_VIDEO: "audio-video",
 };
 
@@ -24,14 +25,12 @@ export class EvidenceRecorder {
   constructor(options = {}) {
     this.mediaRecorder = null;
     this.stream = null;
-    this.chunks = [];
     this.status = RECORDING_STATUS.IDLE;
     this.recordingType = options.recordingType || RECORDING_TYPE.AUDIO_VIDEO;
 
     // Recording configuration
     this.mimeType = this.getMimeType(this.recordingType);
-    this.chunkDuration = options.chunkDuration || 2000; // 2 seconds for real-time chunks
-    this.chunkTimer = null;
+    this.chunkDuration = options.chunkDuration || 10000; // 10 seconds for resilient chunking
 
     // Cloud upload configuration
     this.onChunkReady = options.onChunkReady || null; // Called when chunk is ready to upload
@@ -43,6 +42,7 @@ export class EvidenceRecorder {
     this.startTime = null;
     this.chunkIndex = 0;
     this.uploadedChunks = 0;
+    this.visibilityHandler = null;
 
     // Audio/Video tracks for debugging
     this.audioTrack = null;
@@ -56,6 +56,17 @@ export class EvidenceRecorder {
     if (recordingType === RECORDING_TYPE.AUDIO_ONLY) {
       return "audio/webm";
     }
+
+    if (recordingType === RECORDING_TYPE.VIDEO_ONLY) {
+      const videoTypes = ["video/webm;codecs=vp8", "video/webm", "video/mp4"];
+      for (const mime of videoTypes) {
+        if (MediaRecorder.isTypeSupported(mime)) {
+          return mime;
+        }
+      }
+      return "video/webm";
+    }
+
     // Try different MIME types for video
     const mimeTypes = ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"];
     for (const mime of mimeTypes) {
@@ -76,13 +87,27 @@ export class EvidenceRecorder {
       this.chunkIndex = 0;
       this.uploadedChunks = 0;
 
-      const constraints = this.getConstraints();
-
-      if (!navigator.mediaDevices?.getUserMedia) {
+      if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) {
         throw new Error("MediaRecorder not supported");
       }
 
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const attempts = this.getConstraintAttempts();
+      let lastError = null;
+
+      for (const attempt of attempts) {
+        try {
+          this.recordingType = attempt.type;
+          this.mimeType = this.getMimeType(attempt.type);
+          this.stream = await navigator.mediaDevices.getUserMedia(attempt.constraints);
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!this.stream) {
+        throw lastError || new Error("No media input available");
+      }
 
       // Track audio/video state
       this.audioTrack = this.stream.getAudioTracks()[0] || null;
@@ -90,11 +115,26 @@ export class EvidenceRecorder {
 
       this.mediaRecorder = new MediaRecorder(this.stream, { mimeType: this.mimeType });
 
-      // Collect data for chunking
-      this.chunks = [];
+      // Emit fixed-size chunks from MediaRecorder directly to avoid timer throttling.
       this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          this.chunks.push(event.data);
+        if (event.data.size === 0) {
+          return;
+        }
+
+        const payload = {
+          blob: event.data,
+          chunkIndex: this.chunkIndex,
+          timestamp: new Date(),
+          sessionId: this.sessionId,
+          duration: this.chunkDuration,
+        };
+
+        this.chunkIndex += 1;
+
+        if (this.onChunkReady) {
+          Promise.resolve(this.onChunkReady(payload)).catch((uploadError) => {
+            console.error("Chunk callback failed:", uploadError);
+          });
         }
       };
 
@@ -105,11 +145,19 @@ export class EvidenceRecorder {
         }
       };
 
-      this.mediaRecorder.start();
-      this.setStatus(RECORDING_STATUS.RECORDING);
+      this.visibilityHandler = () => {
+        if (document.hidden && this.mediaRecorder?.state === "recording") {
+          try {
+            this.mediaRecorder.requestData();
+          } catch {
+            // Ignore flush errors and continue recording.
+          }
+        }
+      };
+      document.addEventListener("visibilitychange", this.visibilityHandler);
 
-      // Start auto-chunk extraction for real-time upload
-      this.startChunkExtraction();
+      this.mediaRecorder.start(this.chunkDuration);
+      this.setStatus(RECORDING_STATUS.RECORDING);
 
       return true;
     } catch (error) {
@@ -122,51 +170,66 @@ export class EvidenceRecorder {
     }
   }
 
+  getConstraintAttempts() {
+    if (this.recordingType === RECORDING_TYPE.AUDIO_ONLY) {
+      return [{ type: RECORDING_TYPE.AUDIO_ONLY, constraints: { audio: true } }];
+    }
+
+    if (this.recordingType === RECORDING_TYPE.VIDEO_ONLY) {
+      return [{ type: RECORDING_TYPE.VIDEO_ONLY, constraints: { video: this.getVideoConstraints() } }];
+    }
+
+    return [
+      {
+        type: RECORDING_TYPE.AUDIO_VIDEO,
+        constraints: {
+          audio: this.getAudioConstraints(),
+          video: this.getVideoConstraints(),
+        },
+      },
+      {
+        type: RECORDING_TYPE.AUDIO_ONLY,
+        constraints: { audio: this.getAudioConstraints() },
+      },
+      {
+        type: RECORDING_TYPE.VIDEO_ONLY,
+        constraints: { video: this.getVideoConstraints() },
+      },
+    ];
+  }
+
+  getAudioConstraints() {
+    return {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    };
+  }
+
+  getVideoConstraints() {
+    return {
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      facingMode: "user",
+    };
+  }
+
   /**
    * Get media constraints based on recording type
    */
   getConstraints() {
     if (this.recordingType === RECORDING_TYPE.AUDIO_ONLY) {
-      return { audio: true };
+      return { audio: this.getAudioConstraints() };
+    }
+
+    if (this.recordingType === RECORDING_TYPE.VIDEO_ONLY) {
+      return { video: this.getVideoConstraints() };
     }
 
     return {
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-      video: {
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        facingMode: "user",
-      },
+      audio: this.getAudioConstraints(),
+      video: this.getVideoConstraints(),
     };
-  }
-
-  /**
-   * Extract and emit chunks for upload at regular intervals
-   */
-  startChunkExtraction() {
-    this.chunkTimer = setInterval(() => {
-      if (this.status === RECORDING_STATUS.RECORDING && this.chunks.length > 0) {
-        const blob = new Blob(this.chunks, { type: this.mimeType });
-        const timestamp = new Date();
-
-        if (this.onChunkReady) {
-          this.onChunkReady({
-            blob,
-            chunkIndex: this.chunkIndex,
-            timestamp,
-            sessionId: this.sessionId,
-            duration: this.chunkDuration,
-          });
-        }
-
-        this.chunkIndex++;
-        this.chunks = [];
-      }
-    }, this.chunkDuration);
   }
 
   /**
@@ -195,8 +258,15 @@ export class EvidenceRecorder {
   async stop() {
     return new Promise((resolve) => {
       if (this.mediaRecorder) {
+        if (this.mediaRecorder.state === "recording") {
+          try {
+            this.mediaRecorder.requestData();
+          } catch {
+            // Ignore final flush issues.
+          }
+        }
+
         this.mediaRecorder.onstop = () => {
-          clearInterval(this.chunkTimer);
           this.cleanup();
           this.setStatus(RECORDING_STATUS.COMPLETED);
           resolve({
@@ -230,8 +300,9 @@ export class EvidenceRecorder {
         track.stop();
       });
     }
-    if (this.chunkTimer) {
-      clearInterval(this.chunkTimer);
+    if (this.visibilityHandler) {
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
+      this.visibilityHandler = null;
     }
     this.mediaRecorder = null;
     this.stream = null;

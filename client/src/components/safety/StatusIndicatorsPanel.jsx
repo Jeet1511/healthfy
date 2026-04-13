@@ -8,7 +8,16 @@ import { Mic, MapPin, Video, AlertCircle } from "lucide-react";
 import "./StatusIndicatorsPanel.css";
 
 export default function StatusIndicatorsPanel() {
-  const { sosStatus, isRecordingAudio, isRecordingVideo, location, statusLogs } = useEmergency();
+  const {
+    sosStatus,
+    isRecordingAudio,
+    isRecordingVideo,
+    location,
+    statusLogs,
+    sosMetadata,
+    networkStatus,
+    emergencySession,
+  } = useEmergency();
 
   const isActive = sosStatus === SOS_STATUS.TRIGGERED || sosStatus === SOS_STATUS.RECORDING;
 
@@ -30,6 +39,15 @@ export default function StatusIndicatorsPanel() {
       icon: Video,
       active: isRecordingVideo && isActive,
       color: "purple",
+    },
+    {
+      label: "Contact Alerts",
+      icon: AlertCircle,
+      active:
+        isActive &&
+        ((sosMetadata?.contactsNotified?.length || 0) > 0 ||
+          (emergencySession?.queuedAlerts || 0) > 0),
+      color: "orange",
     },
   ];
 
@@ -69,6 +87,11 @@ export default function StatusIndicatorsPanel() {
         {isActive && statusLogs.length > 0 && (
           <p>
             <strong>Last Update:</strong> {new Date(statusLogs[0].timestamp).toLocaleTimeString()}
+          </p>
+        )}
+        {isActive && (
+          <p>
+            <strong>Network:</strong> {networkStatus.isOnline ? "Online" : "Offline (queueing)"}
           </p>
         )}
       </div>

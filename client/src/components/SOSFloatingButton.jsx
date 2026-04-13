@@ -2,26 +2,23 @@ import { useState } from "react";
 import { useEmergency } from "../context/EmergencyContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, MapPin, Share2 } from "lucide-react";
+import { useSOS } from "@/hooks/useSOS";
+import { SOS_STATUS } from "@/context/EmergencyContext";
 
 export default function SOSFloatingButton() {
-  const { emergencyActive, enterEmergencyMode, appMode, location, setLocation } = useEmergency();
+  const { emergencyActive, appMode, location } = useEmergency();
+  const {
+    isHolding,
+    holdProgress,
+    sosStatus,
+    handleMouseDown,
+    handleMouseUp,
+    handleTouchStart,
+    handleTouchEnd,
+  } = useSOS();
   const [error, setError] = useState("");
   const isEmergency = appMode === "emergency";
-
-  const getLocation = () =>
-    new Promise((resolve, reject) => {
-      if (!navigator.geolocation) { reject(new Error("Geolocation not supported.")); return; }
-      navigator.geolocation.getCurrentPosition((p) => resolve(p), () => reject(new Error("Unable to fetch location.")), { enableHighAccuracy: true, timeout: 10000 });
-    });
-
-  const triggerEmergency = async () => {
-    setError("");
-    enterEmergencyMode();
-    try {
-      const position = await getLocation();
-      setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-    } catch (err) { setError(err.message || "Location unavailable"); }
-  };
+  const isSosActive = sosStatus === SOS_STATUS.TRIGGERED || sosStatus === SOS_STATUS.RECORDING;
 
   const openMap = () => {
     if (!location) return;
@@ -31,22 +28,43 @@ export default function SOSFloatingButton() {
   const shareLocation = async () => {
     if (!location) return;
     const text = `Emergency location: https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-    if (navigator.share) { await navigator.share({ title: "Emergency Location", text }); return; }
-    await navigator.clipboard.writeText(text);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Emergency Location", text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      setError("");
+    } catch {
+      setError("Unable to share location right now.");
+    }
   };
 
   return (
     <>
       <motion.button
         type="button"
-        className="sos-fab"
-        onClick={triggerEmergency}
+        className={`sos-fab ${isHolding ? "holding" : ""} ${isSosActive ? "active" : ""}`}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onContextMenu={(event) => event.preventDefault()}
         aria-label="Trigger SOS"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.92 }}
         style={isEmergency ? { fontFamily: "var(--font-tactical)", letterSpacing: "0.12em" } : {}}
       >
-        SOS
+        <span
+          className="sos-hold-progress"
+          aria-hidden="true"
+          style={{
+            background: `conic-gradient(rgba(255,255,255,0.95) ${holdProgress}%, rgba(255,255,255,0.16) ${holdProgress}% 100%)`,
+            opacity: isHolding ? 1 : 0,
+          }}
+        />
+        <span className="sos-fab-label">{isSosActive ? "SOS" : "HOLD"}</span>
       </motion.button>
 
       <AnimatePresence>

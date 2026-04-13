@@ -1,26 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
-import { useEmergency } from '../../context/EmergencyContext';
-import './SOSActivationModal.css';
+import { useEffect, useMemo, useState } from "react";
+import { X, CheckCircle, AlertTriangle, Clock } from "lucide-react";
+import { SOS_STATUS, useEmergency } from "../../context/EmergencyContext";
+import "./SOSActivationModal.css";
 
 const SOSActivationModal = ({ isOpen, onClose }) => {
-  const { sosStatus, SOS_STATUS, emergency, cancelSOS } = useEmergency();
+  const {
+    sosStatus,
+    sosTriggeredAt,
+    isRecordingAudio,
+    isRecordingVideo,
+    location,
+    sosMetadata,
+    cancelSOS,
+  } = useEmergency();
+
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [statusItems] = useState({
-    recording: { label: 'Recording Started', icon: CheckCircle },
-    tracking: { label: 'Location Shared', icon: CheckCircle },
-    alertSent: { label: 'Alert Sent', icon: CheckCircle },
-  });
+
+  const isActive =
+    sosStatus === SOS_STATUS.TRIGGERED || sosStatus === SOS_STATUS.RECORDING;
 
   useEffect(() => {
-    if (!isOpen || sosStatus !== SOS_STATUS.ACTIVE) return;
+    if (!isOpen || !isActive || !sosTriggeredAt) return;
 
-    const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000);
+    const tick = () => {
+      const start = new Date(sosTriggeredAt).getTime();
+      const now = Date.now();
+      setElapsedTime(Math.max(0, Math.floor((now - start) / 1000)));
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen, sosStatus, SOS_STATUS]);
+  }, [isActive, isOpen, sosTriggeredAt]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -28,18 +40,38 @@ const SOSActivationModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  if (!isOpen || sosStatus !== SOS_STATUS.ACTIVE) {
+  const statusItems = useMemo(
+    () => [
+      {
+        key: "recording",
+        label: "Recording Started",
+        active: isRecordingAudio || isRecordingVideo,
+      },
+      {
+        key: "tracking",
+        label: "Location Shared",
+        active: Boolean(location),
+      },
+      {
+        key: "alerts",
+        label: "Emergency Alerts Sent",
+        active: true,
+      },
+    ],
+    [isRecordingAudio, isRecordingVideo, location]
+  );
+
+  if (!isOpen || !isActive) {
     return null;
   }
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const isRecording = emergency?.isRecording || false;
-  const isTracking = emergency?.isTracking || false;
+  const contactsCount = sosMetadata?.contactsNotified?.length || 0;
 
   return (
     <div className="sos-modal-overlay" onClick={onClose}>
@@ -58,7 +90,7 @@ const SOSActivationModal = ({ isOpen, onClose }) => {
 
         <div className="sos-modal-content">
           <p className="sos-modal-subtitle">
-            Emergency services have been notified. Your location is being shared.
+            Emergency mode is active. Evidence capture and location sharing are running with fallbacks.
           </p>
 
           <div className="sos-timer">
@@ -67,35 +99,19 @@ const SOSActivationModal = ({ isOpen, onClose }) => {
           </div>
 
           <div className="sos-status-list">
-            {statusItems.recording.label && (
-              <div className={`status-item ${isRecording ? 'active' : 'pending'}`}>
+            {statusItems.map((item) => (
+              <div key={item.key} className={`status-item ${item.active ? "active" : "pending"}`}>
                 <CheckCircle size={20} className="status-icon" />
-                <span className="status-label">{statusItems.recording.label}</span>
-                {isRecording && <div className="status-indicator" />}
+                <span className="status-label">{item.label}</span>
+                {item.active && <div className="status-indicator" />}
               </div>
-            )}
-
-            {statusItems.tracking.label && (
-              <div className={`status-item ${isTracking ? 'active' : 'pending'}`}>
-                <CheckCircle size={20} className="status-icon" />
-                <span className="status-label">{statusItems.tracking.label}</span>
-                {isTracking && <div className="status-indicator" />}
-              </div>
-            )}
-
-            {statusItems.alertSent.label && (
-              <div className="status-item active">
-                <CheckCircle size={20} className="status-icon" />
-                <span className="status-label">{statusItems.alertSent.label}</span>
-                <div className="status-indicator" />
-              </div>
-            )}
+            ))}
           </div>
 
           <div className="sos-emergency-contacts">
             <h4>Emergency Contacts Notified</h4>
             <p className="contacts-info">
-              {emergency?.emergencyContacts?.length || 0} contact(s) have been notified with your location.
+              {contactsCount} contact(s) notified with your latest status and location link.
             </p>
           </div>
         </div>
@@ -105,7 +121,7 @@ const SOSActivationModal = ({ isOpen, onClose }) => {
             Cancel SOS
           </button>
           <button className="btn-close" onClick={onClose}>
-            Close
+            Keep Running
           </button>
         </div>
       </div>
