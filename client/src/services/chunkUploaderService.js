@@ -13,19 +13,66 @@ export const UPLOAD_STATUS = {
   RETRYING: "retrying",
 };
 
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function isRetryableStatus(status) {
+  return [408, 425, 429, 500, 502, 503, 504].includes(Number(status));
+}
+
+function parseUploadResult(responseData = {}) {
+  const data = responseData?.data || responseData || {};
+  return {
+    cloudPath: data.cloudPath || data.storagePath || data.path || null,
+  };
+}
+
 class ChunkUploader {
   constructor(apiClient, options = {}) {
     this.apiClient = apiClient;
-    this.uploads = new Map(); // sessionId -> array of uploads
     this.maxRetries = options.maxRetries || 5;
     this.retryDelay = options.retryDelay || 2000; // ms
+    this.syncIntervalMs = options.syncIntervalMs || 15000;
     this.onProgress = options.onProgress || null;
     this.onError = options.onError || null;
     this.isOnline = navigator.onLine;
+    this.syncInProgress = false;
+
+    this.boundHandleOnline = () => this.handleOnline();
+    this.boundHandleOffline = () => this.handleOffline();
 
     // Listen for online/offline events
-    window.addEventListener("online", () => this.handleOnline());
-    window.addEventListener("offline", () => this.handleOffline());
+    window.addEventListener("online", this.boundHandleOnline);
+    window.addEventListener("offline", this.boundHandleOffline);
+
+    this.syncTimer = window.setInterval(() => {
+      if (this.isOnline) {
+        this.syncPendingUploads().catch(() => undefined);
+      }
+    }, this.syncIntervalMs);
+  }
+
+  destroy() {
+    window.removeEventListener("online", this.boundHandleOnline);
+    window.removeEventListener("offline", this.boundHandleOffline);
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+    }
+  }
+
+  getAuthHeaders() {
+    try {
+      const session = JSON.parse(localStorage.getItem("omina_session") || "null");
+      if (session?.token) {
+        return { Authorization: `Bearer ${session.token}` };
+      }
+    } catch {
+      // Ignore malformed auth session payload.
+    }
+    return {};
   }
 
   /**
@@ -34,6 +81,14 @@ class ChunkUploader {
    */
   async uploadChunk(blob, metadata) {
     const { sessionId, chunkIndex, timestamp, location, duration } = metadata;
+
+    if (!sessionId) {
+      throw new Error("Session ID is required for chunk upload");
+    }
+
+    if (chunkIndex == null) {
+      throw new Error("Chunk index is required for chunk upload");
+    }
 
     const uploadRecord = {
       sessionId,
@@ -44,88 +99,174 @@ class ChunkUploader {
       duration,
       status: UPLOAD_STATUS.PENDING,
       retries: 0,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
-    try {
+    if (!this.isOnline) {
+      await offlineStorageService.saveChunkForUpload(uploadRecord);
+      this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.PENDING);
+      return {
+        success: false,
+        queued: true,
+        offline: true,
+        chunkIndex,
+      };
+    }
+
+    return this.performUpload(uploadRecord);
+  }
+
+  /**
+   * Build multipart payload for upload.
+   */
+  buildFormData(uploadRecord, fileFieldName = "video") {
+    const { sessionId, chunkIndex, blob, location, duration } = uploadRecord;
+
+    const formData = new FormData();
+    formData.append(fileFieldName, blob, `chunk-${chunkIndex}.webm`);
+    formData.append("sessionId", sessionId);
+    formData.append("chunkIndex", String(chunkIndex));
+    formData.append("duration", String(duration || 0));
+    formData.append("location", JSON.stringify(location || {}));
+    formData.append("reason", "realtime-chunk");
+
+    return formData;
+  }
+
+  async postToEndpoint(uploadRecord, endpoint) {
+    const response = await this.apiClient.post(
+      endpoint.path,
+      this.buildFormData(uploadRecord, endpoint.fileFieldName),
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...this.getAuthHeaders(),
+        },
+      }
+    );
+
+    return parseUploadResult(response.data);
+  }
+
+  async uploadWithCompatibility(uploadRecord) {
+    const endpoints = [
+      { path: "/upload-video", fileFieldName: "video" },
+      { path: "/evidence/upload-chunk", fileFieldName: "chunk" },
+    ];
+
+    let lastError = null;
+
+    for (let i = 0; i < endpoints.length; i += 1) {
+      const endpoint = endpoints[i];
+      try {
+        return await this.postToEndpoint(uploadRecord, endpoint);
+      } catch (error) {
+        lastError = error;
+        const status = Number(error?.response?.status || 0);
+        const canFallback = [404, 405, 415].includes(status) && i < endpoints.length - 1;
+        if (canFallback) {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw lastError || new Error("Upload failed");
+  }
+
+  shouldQueueForLater(error) {
+    if (!navigator.onLine || !this.isOnline) {
+      return true;
+    }
+
+    const status = Number(error?.response?.status || 0);
+    return !status || isRetryableStatus(status);
+  }
+
+  /**
+   * Perform upload with retry/backoff. Falls back to offline queue when needed.
+   */
+  performUpload = async (uploadRecord) => {
+    const { sessionId, chunkIndex } = uploadRecord;
+
+    for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
       if (!this.isOnline) {
-        // Store offline
         await offlineStorageService.saveChunkForUpload(uploadRecord);
         this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.PENDING);
         return {
           success: false,
+          queued: true,
           offline: true,
           chunkIndex,
         };
       }
 
-      // Upload immediately
-      return await this.performUpload(uploadRecord);
-    } catch (error) {
-      console.error("Chunk upload error:", error);
-      // Save for offline retry
-      await offlineStorageService.saveChunkForUpload(uploadRecord);
-      this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.FAILED);
-      return {
-        success: false,
-        error: error.message,
+      this.notifyProgress(
+        sessionId,
         chunkIndex,
-      };
-    }
-  }
+        attempt === 0 ? UPLOAD_STATUS.UPLOADING : UPLOAD_STATUS.RETRYING
+      );
 
-  /**
-   * Perform actual upload
-   */
-  performUpload = async (uploadRecord) => {
-    const { sessionId, chunkIndex, blob, location, duration } = uploadRecord;
+      try {
+        const uploadResult = await this.uploadWithCompatibility(uploadRecord);
 
-    this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.UPLOADING);
+        uploadRecord.status = UPLOAD_STATUS.SUCCESS;
+        uploadRecord.cloudPath = uploadResult.cloudPath;
+        uploadRecord.uploadedAt = new Date().toISOString();
 
-    const formData = new FormData();
-    formData.append("chunk", blob, `chunk-${chunkIndex}.webm`);
-    formData.append("sessionId", sessionId);
-    formData.append("chunkIndex", chunkIndex);
-    formData.append("duration", duration);
-    formData.append("location", JSON.stringify(location));
+        await offlineStorageService.saveUploadedChunk(uploadRecord);
+        this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.SUCCESS);
 
-    try {
-      const response = await this.apiClient.post("/evidence/upload-chunk", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+        return {
+          success: true,
+          chunkIndex,
+          cloudPath: uploadResult.cloudPath,
+        };
+      } catch (error) {
+        const status = Number(error?.response?.status || 0);
+        const retryable = !status || isRetryableStatus(status);
+        const shouldQueue = this.shouldQueueForLater(error);
 
-      uploadRecord.status = UPLOAD_STATUS.SUCCESS;
-      uploadRecord.cloudPath = response.data.data.cloudPath;
+        if (attempt < this.maxRetries && retryable) {
+          const delay = Math.min(this.retryDelay * Math.pow(2, attempt), 30000);
+          await wait(delay);
+          continue;
+        }
 
-      // Save successful upload
-      await offlineStorageService.saveUploadedChunk(uploadRecord);
+        uploadRecord.retries = attempt + 1;
 
-      this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.SUCCESS);
+        if (shouldQueue) {
+          uploadRecord.status = UPLOAD_STATUS.PENDING;
+          await offlineStorageService.saveChunkForUpload(uploadRecord);
+          this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.PENDING);
 
-      return {
-        success: true,
-        chunkIndex,
-        cloudPath: response.data.data.cloudPath,
-      };
-    } catch (error) {
-      uploadRecord.retries++;
+          return {
+            success: false,
+            queued: true,
+            offline: !navigator.onLine,
+            chunkIndex,
+            error: error?.message || "Upload queued for retry",
+          };
+        }
 
-      if (uploadRecord.retries < this.maxRetries) {
-        uploadRecord.status = UPLOAD_STATUS.RETRYING;
-
-        // Schedule retry with exponential backoff
-        const delay = this.retryDelay * Math.pow(2, uploadRecord.retries - 1);
-        setTimeout(() => this.performUpload(uploadRecord), delay);
-
-        this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.RETRYING);
-      } else {
         uploadRecord.status = UPLOAD_STATUS.FAILED;
         await offlineStorageService.saveFailedChunk(uploadRecord);
         this.notifyProgress(sessionId, chunkIndex, UPLOAD_STATUS.FAILED);
-      }
+        this.onError?.(error);
 
-      throw error;
+        return {
+          success: false,
+          chunkIndex,
+          error: error?.message || "Upload failed",
+        };
+      }
     }
+
+    return {
+      success: false,
+      chunkIndex,
+      error: "Upload failed after retries",
+    };
   };
 
   /**
@@ -140,41 +281,69 @@ class ChunkUploader {
 
     failedChunk.retries = 0;
     failedChunk.status = UPLOAD_STATUS.RETRYING;
-
-    try {
-      return await this.performUpload(failedChunk);
-    } catch (error) {
-      console.error("Retry failed:", error);
-      throw error;
-    }
+    return this.performUpload(failedChunk);
   }
 
   /**
    * Sync all pending uploads when online
    */
-  async syncPendingUploads() {
-    if (!this.isOnline) {
-      console.warn("Still offline, cannot sync");
-      return;
+  async syncPendingUploads(sessionId = null) {
+    if (!this.isOnline || this.syncInProgress) {
+      return { successful: 0, failed: 0, queued: 0, total: 0 };
     }
 
-    const pendingChunks = await offlineStorageService.getPendingChunks();
+    this.syncInProgress = true;
 
-    if (pendingChunks.length === 0) {
-      console.log("No pending uploads to sync");
-      return;
+    try {
+      const pendingChunks = await offlineStorageService.getPendingChunks(sessionId);
+
+      if (pendingChunks.length === 0) {
+        return { successful: 0, failed: 0, queued: 0, total: 0 };
+      }
+
+      const sortedChunks = [...pendingChunks].sort((a, b) => {
+        const aTime = new Date(a.createdAt || 0).getTime();
+        const bTime = new Date(b.createdAt || 0).getTime();
+
+        if (a.sessionId !== b.sessionId) {
+          return String(a.sessionId).localeCompare(String(b.sessionId));
+        }
+        if (aTime !== bTime) {
+          return aTime - bTime;
+        }
+        return Number(a.chunkIndex || 0) - Number(b.chunkIndex || 0);
+      });
+
+      let successful = 0;
+      let failed = 0;
+      let queued = 0;
+
+      for (const chunk of sortedChunks) {
+        // eslint-disable-next-line no-await-in-loop
+        const result = await this.performUpload({
+          ...chunk,
+          status: UPLOAD_STATUS.PENDING,
+          retries: Number(chunk.retries || 0),
+        });
+
+        if (result.success) {
+          successful += 1;
+        } else if (result.queued) {
+          queued += 1;
+        } else {
+          failed += 1;
+        }
+      }
+
+      return {
+        successful,
+        failed,
+        queued,
+        total: sortedChunks.length,
+      };
+    } finally {
+      this.syncInProgress = false;
     }
-
-    console.log(`Syncing ${pendingChunks.length} pending chunks...`);
-
-    const results = await Promise.allSettled(
-      pendingChunks.map((chunk) => this.performUpload(chunk))
-    );
-
-    const successful = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
-    console.log(`Synced: ${successful}/${pendingChunks.length} chunks`);
-
-    return { successful, total: pendingChunks.length };
   }
 
   /**
@@ -182,7 +351,7 @@ class ChunkUploader {
    */
   handleOnline = async () => {
     this.isOnline = true;
-    console.log("Connection restored, syncing pending uploads...");
+    this.notifyProgress("system", -1, UPLOAD_STATUS.RETRYING);
     await this.syncPendingUploads();
   };
 
@@ -191,7 +360,7 @@ class ChunkUploader {
    */
   handleOffline = () => {
     this.isOnline = false;
-    console.log("Connection lost, future uploads will be queued");
+    this.notifyProgress("system", -1, UPLOAD_STATUS.PENDING);
   };
 
   /**

@@ -1,9 +1,8 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AppShell from "./components/AppShell";
 import { useEmergencySystemInit } from "@/hooks/useEmergencySystemInit";
-import { useServiceWorker, requestPushNotificationPermission } from "@/hooks/useServiceWorker";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
 import {
   HomePage,
   MapPage,
@@ -64,11 +63,6 @@ export default function App() {
 
   // Initialize service worker for offline support, caching, and push notifications
   const { isOnline, isUpdateAvailable, updateServiceWorker } = useServiceWorker();
-
-  // Request push notification permission for emergency alerts
-  useEffect(() => {
-    requestPushNotificationPermission();
-  }, []);
 
   return (
     <AppShell>

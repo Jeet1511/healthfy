@@ -120,6 +120,56 @@ router.post(
 );
 
 /**
+ * POST /api/sos/location-log
+ * Receive real-time location updates during emergency mode.
+ */
+router.post(
+  "/location-log",
+  asyncHandler(async (req, res) => {
+    const {
+      sessionId,
+      latitude,
+      longitude,
+      accuracy,
+      speed,
+      heading,
+      mode,
+      reason,
+    } = req.body;
+
+    if (typeof latitude !== "number" || typeof longitude !== "number") {
+      throw new AppError("Latitude and longitude are required", 400);
+    }
+
+    const profile = await EmergencyProfile.findOne({ userId: req.user._id });
+
+    // Accept location logs even when profile is not yet configured.
+    if (!profile) {
+      return res.json({
+        success: true,
+        message: "Location log accepted",
+      });
+    }
+
+    profile.recordEmergency({
+      reason: `location-log:${sessionId || "unknown"}`,
+      location: { latitude, longitude },
+      audio: false,
+      video: false,
+      contactsNotified: 0,
+      notes: `mode=${mode || "unknown"}; reason=${reason || "watch"}; accuracy=${accuracy || "n/a"}; speed=${speed || "n/a"}; heading=${heading || "n/a"}`,
+    });
+
+    await profile.save();
+
+    res.json({
+      success: true,
+      message: "Location logged",
+    });
+  })
+);
+
+/**
  * POST /api/sos/upload-chunk
  * Upload recording chunk
  */

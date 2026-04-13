@@ -5,8 +5,12 @@
 
 import { useEffect, useRef } from "react";
 import { useEmergency } from "@/context/EmergencyContext";
-import { requestAllCriticalPermissions, getDeviceCapabilities } from "@/utils/permissions";
+import { getDeviceCapabilities } from "@/utils/permissions";
 import { watchLocation, stopWatchingLocation } from "@/services/locationService";
+import {
+  permissionOrchestrator,
+  PERMISSION_TYPES,
+} from "@/services/permissionOrchestrator";
 
 export function useEmergencySystemInit() {
   const context = useEmergency();
@@ -23,35 +27,27 @@ export function useEmergencySystemInit() {
         console.log("Device Capabilities:", deviceCapabilities);
         context.addStatusLog("Device initialized", "info");
 
-        // Request critical permissions (non-blocking)
-        // User can allow/deny at their own pace
-        requestAllCriticalPermissions()
-          .then((permissions) => {
-            console.log("Permissions status:", permissions);
+        // Sync current permission states without forcing immediate browser prompts.
+        const initialization = await permissionOrchestrator.initialize();
+        context.updateAllPermissions(initialization.permissions || {});
 
-            if (permissions.location === "granted") {
-              context.updatePermission("location", "granted");
-              context.addStatusLog("✓ Location permission granted", "success");
-            }
+        permissionOrchestrator.onStatusChange(({ type, status }) => {
+          context.updatePermission(type, status);
+        });
 
-            if (permissions.microphone === "granted") {
-              context.updatePermission("microphone", "granted");
-              context.addStatusLog("✓ Microphone permission granted", "success");
-            }
-
-            if (permissions.camera === "granted") {
-              context.updatePermission("camera", "granted");
-              context.addStatusLog("✓ Camera permission granted", "success");
-            }
-
-            if (permissions.notifications === "granted") {
-              context.updatePermission("notifications", "granted");
-              context.addStatusLog("✓ Notifications permission granted", "success");
-            }
-          })
-          .catch((error) => {
-            console.error("Error requesting permissions:", error);
-          });
+        const current = permissionOrchestrator.getPermissionStatus();
+        if (current[PERMISSION_TYPES.LOCATION] === "granted") {
+          context.addStatusLog("✓ Location permission available", "success");
+        }
+        if (current[PERMISSION_TYPES.MICROPHONE] === "granted") {
+          context.addStatusLog("✓ Microphone permission available", "success");
+        }
+        if (current[PERMISSION_TYPES.CAMERA] === "granted") {
+          context.addStatusLog("✓ Camera permission available", "success");
+        }
+        if (current[PERMISSION_TYPES.NOTIFICATIONS] === "granted") {
+          context.addStatusLog("✓ Notification permission available", "success");
+        }
 
         // Set up background location tracking (low accuracy for battery)
         // Only starts if user is in emergency mode

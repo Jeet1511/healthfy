@@ -40,13 +40,24 @@ const evidenceSchema = new mongoose.Schema(
     duration: Number,
     recordingType: {
       type: String,
-      enum: ["audio-only", "audio-video"],
+      enum: ["audio-only", "video-only", "audio-video", "location-only"],
       default: "audio-video",
     },
     status: {
       type: String,
-      enum: ["recording", "completed", "failed"],
+      enum: ["recording", "syncing", "completed", "failed", "failed_partial"],
       default: "recording",
+    },
+    sessionState: {
+      type: String,
+      enum: ["active", "syncing", "completed", "failed_partial"],
+      default: "active",
+      index: true,
+    },
+    mode: {
+      type: String,
+      enum: ["daily", "emergency"],
+      default: "emergency",
     },
     location: {
       startLatitude: Number,
@@ -54,6 +65,22 @@ const evidenceSchema = new mongoose.Schema(
       endLatitude: Number,
       endLongitude: Number,
     },
+    timeline: [
+      {
+        type: String,
+        label: String,
+        severity: {
+          type: String,
+          enum: ["info", "success", "warning", "error"],
+          default: "info",
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        payload: mongoose.Schema.Types.Mixed,
+      },
+    ],
     chunks: [evidenceChunkSchema],
     totalChunks: Number,
     uploadedChunks: { type: Number, default: 0 },
@@ -65,7 +92,14 @@ const evidenceSchema = new mongoose.Schema(
       deviceInfo: String,
       browserInfo: String,
       emergencyContactsNotified: [String],
+      networkOnline: Boolean,
+      silentMode: Boolean,
+      backgroundRecording: Boolean,
+      chunkDurationMs: Number,
       notes: String,
+      voiceProofUrl: String,
+      incidentDescription: String,
+      trustedLinkExpiresAt: Date,
     },
     tamperProof: {
       hash: String,

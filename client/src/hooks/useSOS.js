@@ -13,27 +13,74 @@ export function useSOS() {
   const context = useEmergency();
   const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
-  const [sosHandler, setSosHandler] = useState(null);
 
+  const contextRef = useRef(context);
+  const contextProxyRef = useRef(null);
+  const sosHandlerRef = useRef(null);
   const holdStartTime = useRef(null);
   const holdInterval = useRef(null);
-  const holdTimer = useRef(null);
+
+  useEffect(() => {
+    contextRef.current = context;
+  }, [context]);
 
   // Initialize SOS handler
   useEffect(() => {
-    const handler = createSOSHandler(context);
-    setSosHandler(handler);
+    if (!contextProxyRef.current) {
+      contextProxyRef.current = new Proxy(
+        {},
+        {
+          get(_, prop) {
+            return contextRef.current[prop];
+          },
+        }
+      );
+    }
+
+    const handler = createSOSHandler(contextProxyRef.current);
+    sosHandlerRef.current = handler;
 
     return () => {
       if (handler.locationWatchId !== null) {
         handler.deactivate();
       }
+      if (typeof handler.destroy === "function") {
+        handler.destroy();
+      }
     };
-  }, [context]);
+  }, []);
+
+  const triggerWithSource = useCallback(async (source) => {
+    const currentStatus = contextRef.current.sosStatus;
+    if (
+      !sosHandlerRef.current ||
+      currentStatus === SOS_STATUS.TRIGGERED ||
+      currentStatus === SOS_STATUS.RECORDING
+    ) {
+      return;
+    }
+
+    if (navigator.vibrate) {
+      navigator.vibrate([80, 40, 120]);
+    }
+
+    await sosHandlerRef.current.trigger({ triggerSource: source });
+  }, []);
 
   // Handle button press (hold to activate)
   const handleMouseDown = useCallback(() => {
-    if (context.sosStatus !== SOS_STATUS.ARMED) return;
+    const currentStatus = contextRef.current.sosStatus;
+    if (
+      currentStatus === SOS_STATUS.COOLDOWN ||
+      currentStatus === SOS_STATUS.TRIGGERED ||
+      currentStatus === SOS_STATUS.RECORDING
+    ) {
+      return;
+    }
+
+    if (navigator.vibrate) {
+      navigator.vibrate(20);
+    }
 
     holdStartTime.current = Date.now();
     setIsHolding(true);
@@ -48,10 +95,10 @@ export function useSOS() {
       if (elapsed >= HOLD_DURATION) {
         clearInterval(holdInterval.current);
         // Auto-trigger when hold duration reached
-        handleTrigger();
+        triggerWithSource("hold-button");
       }
     }, 50);
-  }, [context.sosStatus]);
+  }, [triggerWithSource]);
 
   // Handle release
   const handleMouseUp = useCallback(() => {
@@ -69,18 +116,16 @@ export function useSOS() {
 
   // Trigger SOS
   const handleTrigger = useCallback(async () => {
-    if (!sosHandler || context.sosStatus === SOS_STATUS.TRIGGERED) return;
-
-    await sosHandler.trigger();
-  }, [sosHandler, context.sosStatus]);
+    await triggerWithSource("manual-trigger");
+  }, [triggerWithSource]);
 
   // Deactivate SOS
   const handleDeactivate = useCallback(async () => {
-    if (!sosHandler) return;
+    if (!sosHandlerRef.current) return;
 
-    await sosHandler.deactivate();
-    context.enterDailyMode();
-  }, [sosHandler, context]);
+    await sosHandlerRef.current.deactivate();
+    contextRef.current.enterDailyMode();
+  }, []);
 
   // Voice command trigger (if Web Speech API available)
   useEffect(() => {
@@ -104,8 +149,8 @@ export function useSOS() {
           transcript.includes("emergency") ||
           transcript.includes("save me")
         ) {
-          context.addStatusLog(`🎙️ Voice command detected: "${transcript}"`, "info");
-          handleTrigger();
+          contextRef.current.addStatusLog(`🎙️ Voice command detected: "${transcript}"`, "info");
+          triggerWithSource("voice-command");
           break;
         }
       }
@@ -116,7 +161,57 @@ export function useSOS() {
     return () => {
       recognition.stop();
     };
-  }, [context.voiceCommandActive, handleTrigger, context]);
+  }, [context.voiceCommandActive, triggerWithSource]);
+
+  // Motion trigger: detect shake to activate SOS.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.DeviceMotionEvent) {
+      return;
+    }
+
+    let last = { x: null, y: null, z: null };
+    let lastShakeAt = 0;
+
+    const handleMotion = (event) => {
+      const currentStatus = contextRef.current.sosStatus;
+      if (
+        currentStatus === SOS_STATUS.COOLDOWN ||
+        currentStatus === SOS_STATUS.TRIGGERED ||
+        currentStatus === SOS_STATUS.RECORDING
+      ) {
+        return;
+      }
+
+      const accel = event.accelerationIncludingGravity;
+      if (!accel) {
+        return;
+      }
+
+      if (last.x === null) {
+        last = { x: accel.x, y: accel.y, z: accel.z };
+        return;
+      }
+
+      const deltaX = Math.abs((accel.x || 0) - (last.x || 0));
+      const deltaY = Math.abs((accel.y || 0) - (last.y || 0));
+      const deltaZ = Math.abs((accel.z || 0) - (last.z || 0));
+
+      last = { x: accel.x, y: accel.y, z: accel.z };
+
+      const shakeStrength = deltaX + deltaY + deltaZ;
+      const now = Date.now();
+      if (shakeStrength > 28 && now - lastShakeAt > 2500) {
+        lastShakeAt = now;
+        contextRef.current.addStatusLog("Motion trigger detected (device shake)", "warning");
+        triggerWithSource("motion-shake");
+      }
+    };
+
+    window.addEventListener("devicemotion", handleMotion);
+    return () => {
+      window.removeEventListener("devicemotion", handleMotion);
+    };
+  }, [triggerWithSource]);
 
   return {
     // State
@@ -137,7 +232,7 @@ export function useSOS() {
     handleDeactivate,
 
     // Data
-    sosHandler,
-    summary: sosHandler?.getSummary(),
+    sosHandler: sosHandlerRef.current,
+    summary: sosHandlerRef.current?.getSummary(),
   };
 }
